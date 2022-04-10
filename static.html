@@ -44,8 +44,10 @@ var params = {
     poleRadius: 2,
     poleHeight: 50,
     tableWidth: 150,
-    tableHeight: 15,
-    tableDepth: 60
+    tableHeight: 20,
+    tableDepth: 60,
+    signHeight: 20,
+    signDepth: 10
 }
 var scene = new THREE.Scene(); 
 var renderer = new THREE.WebGLRenderer();
@@ -54,35 +56,53 @@ TW.mainInit(renderer,scene);
 var table = new THREE.Object3D();
 
 // create a box for the table
-var tableGeom = new THREE.BoxGeometry(params.tableWidth, params.tableHeight, params.tableDepth);
-var tableMat = new THREE.MeshBasicMaterial({color: new THREE.Color("red")});
+var tableGeom = new THREE.BoxGeometry(
+                    params.tableWidth, params.tableHeight, params.tableDepth);
+var tableMat = new THREE.MeshPhongMaterial({color: new THREE.Color("gray")});
 var tableMesh = new THREE.Mesh(tableGeom, tableMat);
-//tableMesh.position.set(0,-20,0);
+
 table.add(tableMesh);
 
 // create the poles for the table
-var pole1 = new THREE.CylinderGeometry( params.poleRadius,
+var pole = new THREE.CylinderGeometry( params.poleRadius,
                                         params.poleRadius,
                                         params.poleHeight );
-var pole2 = new THREE.CylinderGeometry( 
-                                        params.poleRadius,
-                                        params.poleRadius,
-                                        params.poleHeight );
-var poleMat = new THREE.MeshBasicMaterial({color:new THREE.Color("brown")});
-var poleMesh1 = new THREE.Mesh(pole1,poleMat);
-var poleMesh2 = new THREE.Mesh(pole2,poleMat);
+
+var poleMat = new THREE.MeshPhongMaterial({color:new THREE.Color("brown")});
+var poleMesh1 = new THREE.Mesh(pole,poleMat); // left
+var poleMesh2 = new THREE.Mesh(pole,poleMat); // right
 
 // set the position of the poles
-poleMesh1.position.set( -params.tableWidth/ + params.poleRadius,
+poleMesh1.position.set( -params.tableWidth/2 + params.poleRadius,
                         params.poleHeight/2,
                         params.tableDepth/2 - params.poleRadius );
+
 poleMesh2.position.set( params.tableWidth/2 - params.poleRadius,
                         params.poleHeight/2,
                         params.tableDepth/2-params.poleRadius );
 table.add(poleMesh1);
 table.add(poleMesh2);
 
+// create the sign
+var signGeom = new THREE.BoxGeometry(
+                    params.tableWidth, params.signHeight, params.signDepth);
+var signMat = new THREE.MeshBasicMaterial({color: new THREE.Color("gray")});
+var signMesh = new THREE.Mesh(signGeom, signMat);
+
+signMesh.position.set(0, params.poleHeight + params.signHeight/2, 
+                      params.tableDepth/2 - params.signDepth / 4);
+table.add(signMesh);
+
+
+table.position.set(0,-20,0);
 scene.add(table);
+
+// ===================
+// lighting
+// ===================
+var ambLight = new THREE.AmbientLight(0xffffff);
+scene.add(ambLight);
+
 // TW.render();
 
 var state = TW.cameraSetup(renderer,
