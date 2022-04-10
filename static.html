@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- 
+Name: Audrea Huang and Nanxi Liu
+Assignment 6: Nightmarket (static rendition)
+Date: April 15, 2022
+Creates a static image of a nightmarket food stand.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nightmarket</title>
+<style>      
+      canvas {
+          display: block;
+          margin: 10px auto;
+          width: 800px;
+          height: 500px;
+      }
+    </style>
+
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-sp21.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa18.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui.min.js"
+</script>
+
+</head>
+<body>
+<h1>Nightmarket</h1>
+<p> <b>Name</b>: Audrea Huang<br>
+    <b>Assignment 6:</b> Nightmarket<br>
+    <b>Date</b>: April 15, 2022<br>
+<br></p>
+
+<script id="prog">
+var params = {
+    poleRadius: 2,
+    poleHeight: 50,
+    tableWidth: 150,
+    tableHeight: 15,
+    tableDepth: 60
+}
+var scene = new THREE.Scene(); 
+var renderer = new THREE.WebGLRenderer();
+TW.mainInit(renderer,scene);
+
+var table = new THREE.Object3D();
+
+// create a box for the table
+var tableGeom = new THREE.BoxGeometry(params.tableWidth, params.tableHeight, params.tableDepth);
+var tableMat = new THREE.MeshBasicMaterial({color: new THREE.Color("red")});
+var tableMesh = new THREE.Mesh(tableGeom, tableMat);
+//tableMesh.position.set(0,-20,0);
+table.add(tableMesh);
+
+// create the poles for the table
+var pole1 = new THREE.CylinderGeometry( params.poleRadius,
+                                        params.poleRadius,
+                                        params.poleHeight );
+var pole2 = new THREE.CylinderGeometry( 
+                                        params.poleRadius,
+                                        params.poleRadius,
+                                        params.poleHeight );
+var poleMat = new THREE.MeshBasicMaterial({color:new THREE.Color("brown")});
+var poleMesh1 = new THREE.Mesh(pole1,poleMat);
+var poleMesh2 = new THREE.Mesh(pole2,poleMat);
+
+// set the position of the poles
+poleMesh1.position.set( -params.tableWidth/ + params.poleRadius,
+                        params.poleHeight/2,
+                        params.tableDepth/2 - params.poleRadius );
+poleMesh2.position.set( params.tableWidth/2 - params.poleRadius,
+                        params.poleHeight/2,
+                        params.tableDepth/2-params.poleRadius );
+table.add(poleMesh1);
+table.add(poleMesh2);
+
+scene.add(table);
+// TW.render();
+
+var state = TW.cameraSetup(renderer,
+                           scene,
+                           {minx: -50, maxx: 50,
+                            miny: -50, maxy: 50,
+                            minz: -50, maxz: 50});
+
+</script>
+</body>
+</html>
