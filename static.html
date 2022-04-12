@@ -49,6 +49,7 @@ var params = {
     signHeight: 20,
     signDepth: 10
 }
+var textureGlobal; // textures for mapping images
 var scene = new THREE.Scene(); 
 var renderer = new THREE.WebGLRenderer();
 TW.mainInit(renderer,scene);
@@ -83,25 +84,93 @@ poleMesh2.position.set( params.tableWidth/2 - params.poleRadius,
 table.add(poleMesh1);
 table.add(poleMesh2);
 
-// create the sign
-var signGeom = new THREE.BoxGeometry(
-                    params.tableWidth, params.signHeight, params.signDepth);
-var signMat = new THREE.MeshBasicMaterial({color: new THREE.Color("gray")});
-var signMesh = new THREE.Mesh(signGeom, signMat);
+function addTextureCoords (signGeom, textures) {
+    /* add coordinates to map textures onto */
+    if( ! signGeom instanceof THREE.Geometry ) {
+        throw "not a THREE.Geometry: "+signGeom;
+    }
+    // array of face descriptors
+    var UVs = [];
+    function faceCoords(as,at, bs,bt, cs,ct) {
+        UVs.push( [ new THREE.Vector2(as,at),
+                    new THREE.Vector2(bs,bt),
+                    new THREE.Vector2(cs,ct) ] );
+    }
+    // front (face 0-1)
+    faceCoords(0,0, 1,0, 1,1);
+    faceCoords(0,0, 1,1, 0,1);
+    // back (faces 2-3)
+    faceCoords(1,0, 0,1, 0,0);
+    faceCoords(1,0, 1,1, 0,1);
+    // top (faces 4-5)
+    faceCoords(1,0, 1,1, 0,0);
+    faceCoords(1,1, 0,1, 0,0);
+    // left (faces 6-7)
+    faceCoords(1,0, 0,1, 0,0);
+    faceCoords(1,1, 0,1, 1,0);
+    // right (faces 8-9)
+    faceCoords(0,0, 1,0, 0,1);
+    faceCoords(1,0, 1,1, 0,1);
+    // bottom (faces 10-11)
+    faceCoords(0,0, 1,0, 0,1);
+    faceCoords(1,0, 1,1, 0,1);
 
-signMesh.position.set(0, params.poleHeight + params.signHeight/2, 
-                      params.tableDepth/2 - params.signDepth / 4);
-table.add(signMesh);
+    // attach this to the geometry
+    signGeom.faceVertexUvs = [ UVs ];
+}
+
+
+// create the sign
+function createSign(textures) {
+    var signGeom = new THREE.BoxGeometry(
+                    params.tableWidth, params.signHeight, params.signDepth);
+    
+    addTextureCoords(signGeom, textures);
+    var materials = [ 
+        new THREE.MeshBasicMaterial( {color: 0xffffff, map: textures[0]}) ];
+    signGeom.faces[0].materialIndex = 0;
+    signGeom.faces[1].materialIndex = 0;
+    textures.needsUpdate = true;
+
+    // var signMat = new THREE.MeshBasicMaterial({color: 0xffffff, 
+    //                                           map: textures[0]} );
+    var signMesh = new THREE.Mesh(signGeom, materials);
+
+    signMesh.position.set(0, params.poleHeight + params.signHeight/2, 
+                        params.tableDepth/2 - params.signDepth / 4);
+
+    table.add(signMesh);
+    TW.render();
+}
 
 
 table.position.set(0,-20,0);
 scene.add(table);
 
 // ===================
+// textures
+// ===================
+
+TW.loadTextures(["sign.png"], 
+                function (textures) {
+                    textureGlobal = textures;
+                    createSign(textures);
+                } );
+
+
+// ===================
 // lighting
 // ===================
 var ambLight = new THREE.AmbientLight(0xffffff);
 scene.add(ambLight);
+
+var dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+dirLight.position.set(0, params.poleHeight, 
+                        params.tableDepth/2 - params.signDepth / 4);
+dirLight.target.position.set(0, 0, -params.tableDepth/16);
+scene.add(dirLight);
+scene.add(dirLight.target);
+
 
 // TW.render();
 
