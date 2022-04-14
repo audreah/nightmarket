@@ -185,24 +185,30 @@ function createCandy() {
     var candy = new THREE.Object3D();
     candy.add(createStick());
     ball1 = createBall();
-    ball1.position.y = -params.candyStickHeight/2 + 3;
+    ball1.position.y = -params.candyStickHeight/2 + 5;
     candy.add(ball1);
-
-    ball2 = createBall();
-    ball2.position.y = -params.candyStickHeight/2 + 5;
-    candy.add(ball2);
 
     ball2 = createBall();
     ball2.position.y = -params.candyStickHeight/2 + 7;
     candy.add(ball2);
 
+    ball2 = createBall();
+    ball2.position.y = -params.candyStickHeight/2 + 9;
+    candy.add(ball2);
+
     return candy;
 }
 
-var candy = createCandy();
-marketStand.add(candy);
-candy.position.set(
-    0, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+// add candies to the stand
+for (var j=0; j<14; j++) {
+    var candy = createCandy();
+    table.add(candy);
+    candy.position.set(
+        j*-5, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+}
+
+
+
 
 marketStand.position.set(0,-20,0);
 scene.add(marketStand);
@@ -228,7 +234,7 @@ scene.add(ambLight);
 
 var dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
 dirLight.position.set(0, params.poleHeight, 
-                        params.tableDepth/2 - params.signDepth / 4);
+                        params.tableDepth/2 - params.signDepth / 2);
 dirLight.target.position.set(0, 0, -params.tableDepth/16);
 scene.add(dirLight);
 scene.add(dirLight.target);
