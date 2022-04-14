@@ -47,7 +47,8 @@ var params = {
     tableHeight: 20,
     tableDepth: 60,
     signHeight: 20,
-    signDepth: 10
+    signDepth: 10,
+    candyStickHeight: 8
 }
 var textureGlobal; // textures for mapping images
 var scene = new THREE.Scene(); 
@@ -69,7 +70,7 @@ var pole = new THREE.CylinderGeometry( params.poleRadius,
                                         params.poleRadius,
                                         params.poleHeight );
 
-var poleMat = new THREE.MeshPhongMaterial({color:new THREE.Color("brown")});
+var poleMat = new THREE.MeshPhongMaterial({color:new THREE.Color("grey")});
 var poleMesh1 = new THREE.Mesh(pole,poleMat); // left
 var poleMesh2 = new THREE.Mesh(pole,poleMat); // right
 
@@ -96,22 +97,22 @@ function addTextureCoords (signGeom, textures) {
                     new THREE.Vector2(bs,bt),
                     new THREE.Vector2(cs,ct) ] );
     }
-    // front (face 0-1)
-    faceCoords(0,0, 1,0, 1,1);
-    faceCoords(0,0, 1,1, 0,1);
-    // back (faces 2-3)
+    // right (face 0-1)
+    faceCoords(1,0, 0,0, 1,1);
+    faceCoords(1,1, 0,0, 0,1);
+    // left (faces 2-3)
     faceCoords(1,0, 0,1, 0,0);
     faceCoords(1,0, 1,1, 0,1);
     // top (faces 4-5)
-    faceCoords(1,0, 1,1, 0,0);
+    faceCoords(1,1, 1,0, 0,1);
+    faceCoords(0,1, 1,1, 1,0);
+    // bottom (faces 6-7)
+    faceCoords(1,1, 1,1, 0,0);
     faceCoords(1,1, 0,1, 0,0);
-    // left (faces 6-7)
-    faceCoords(1,0, 0,1, 0,0);
-    faceCoords(1,1, 0,1, 1,0);
-    // right (faces 8-9)
-    faceCoords(0,0, 1,0, 0,1);
-    faceCoords(1,0, 1,1, 0,1);
-    // bottom (faces 10-11)
+    // front (faces 8-9)
+    faceCoords(0,1, 0,0, 1,1);
+    faceCoords(0,0, 1,0, 1,1);
+    // back (faces 10-11)
     faceCoords(0,0, 1,0, 0,1);
     faceCoords(1,0, 1,1, 0,1);
 
@@ -120,41 +121,102 @@ function addTextureCoords (signGeom, textures) {
 }
 
 
-// create the sign
 function createSign(textures) {
+    /* Create the sign for the nightmarket stand.
+     * @param textures - list of textures */
     var signGeom = new THREE.BoxGeometry(
                     params.tableWidth, params.signHeight, params.signDepth);
     
     addTextureCoords(signGeom, textures);
     var materials = [ 
-        new THREE.MeshBasicMaterial( {color: 0xffffff, map: textures[0]}) ];
-    signGeom.faces[0].materialIndex = 0;
-    signGeom.faces[1].materialIndex = 0;
+        new THREE.MeshPhongMaterial( {color: 0xffffff, map: textures[0]} ),
+        new THREE.MeshPhongMaterial( {color: 0xffffff, map: textures[1]} ) ];
+    
+    // only map the sign name on the front
+    for (var i=0; i<12; i++) {
+        if (i == 8 || i == 9) {
+            signGeom.faces[i].materialIndex = 0;
+            signGeom.faces[i].materialIndex = 0;
+        } else {
+            signGeom.faces[i].materialIndex = 1;
+        }
+    }
     textures.needsUpdate = true;
-
-    // var signMat = new THREE.MeshBasicMaterial({color: 0xffffff, 
-    //                                           map: textures[0]} );
     var signMesh = new THREE.Mesh(signGeom, materials);
-
     signMesh.position.set(0, params.poleHeight + params.signHeight/2, 
                         params.tableDepth/2 - params.signDepth / 4);
 
     table.add(signMesh);
-    TW.render();
+}
+
+// create an object for the stand as a whole so it is easier to move
+var marketStand = new THREE.Object3D();
+marketStand.add(table);
+
+
+// ===================
+// food
+// ===================
+
+function createStick() {
+    /* Creates the stick for the candy. */
+    var stickGeom = new THREE.CylinderGeometry(
+                        0.2, 0.2, params.candyStickHeight);
+    var stickMat = new THREE.MeshPhongMaterial(
+        {color:new THREE.Color("brown")});
+    var stickMesh = new THREE.Mesh(stickGeom, stickMat);
+    return stickMesh;
+}
+
+function createBall() {
+    /* Creates one of the red spherical candies. */
+    var ballGeom = new THREE.SphereGeometry(1);
+    var ballMat = new THREE.MeshPhongMaterial(
+        {color:new THREE.Color("red"), side: THREE.DoubleSide});
+    var ballMesh = new THREE.Mesh(ballGeom, ballMat);
+    return ballMesh;
 }
 
 
-table.position.set(0,-20,0);
-scene.add(table);
+function createCandy() {
+    /* Creates one instance of an entire candy, consisting of 
+     * a stick and red candies. */
+
+    var candy = new THREE.Object3D();
+    candy.add(createStick());
+    ball1 = createBall();
+    ball1.position.y = -params.candyStickHeight/2 + 3;
+    candy.add(ball1);
+
+    ball2 = createBall();
+    ball2.position.y = -params.candyStickHeight/2 + 5;
+    candy.add(ball2);
+
+    ball2 = createBall();
+    ball2.position.y = -params.candyStickHeight/2 + 7;
+    candy.add(ball2);
+
+    return candy;
+}
+
+var candy = createCandy();
+marketStand.add(candy);
+candy.position.set(
+    0, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+
+marketStand.position.set(0,-20,0);
+scene.add(marketStand);
+TW.render();
 
 // ===================
 // textures
 // ===================
 
-TW.loadTextures(["sign.png"], 
+TW.loadTextures(["sign.png", "bg.png"], 
                 function (textures) {
                     textureGlobal = textures;
                     createSign(textures);
+                    TW.render();
                 } );
 
 
