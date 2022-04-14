@@ -1,0 +1,530 @@
+<!doctype html>
+<!-- 
+Name: Audrea Huang and Nanxi Liu
+Assignment 6: Nightmarket (static rendition)
+Date: April 15, 2022
+Creates a static image of a nightmarket food stand.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nightmarket</title>
+<style>      
+      canvas {
+          display: block;
+          margin: 10px auto;
+          width: 800px;
+          height: 500px;
+      }
+    </style>
+
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-sp21.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa18.js"
+</script>
+<script src="https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui-r95.js">
+"https://cs.wellesley.edu/~cs307/threejs/libs/dat.gui.min.js"
+</script>
+
+</head>
+<body>
+<h1>Nightmarket</h1>
+<p> <b>Name</b>: Audrea Huang and Nanxi Liu<br>
+    <b>Assignment 6:</b> Nightmarket<br>
+    <b>Date</b>: April 15, 2022<br>
+<br></p>
+
+<script id="prog">
+var params = {
+    poleRadius: 2,
+    poleHeight: 50,
+    tableWidth: 150,
+    tableHeight: 20,
+    tableDepth: 60,
+    signHeight: 20,
+    signDepth: 10,
+    candyStickHeight: 8,
+    //params for arms
+    armRadius:0.5,
+    armLength:12,
+    armRotation:Math.PI/1.5,
+    fingerLength:4,
+    fingerRotation: Math.PI/6,
+    fingerPosY: -3,
+    //params for legs
+    legRadius: 0.5,
+    legHeight: 5,
+    footRadius: 0.5,
+    footScaleX: 1,
+    footScaleY: 0.5,
+    footScaleZ: 2,
+    footPositionZ: 1.5,
+    footPositionY: -7.5,
+    headRadius: 10,
+    noseHeight:15,
+    noseRadiusTop:4,
+    noseRadiusBottom:8,
+    noseRotationZ: 1,
+    nosePositionX: -8,
+    nosePositionY:7,
+    bodyScaleY: 1.5,
+    dimpleAngleX: Math.PI/2,
+    dimpleAngleZ: -Math.PI/5,
+    eyeRadius:1.5,
+    eyeAngleXL: -Math.PI/4,
+    eyeAngleYL: -Math.PI/10,
+    eyeAngleXR: -Math.PI/6,
+    eyeAngleYR: Math.PI/20,//Math.PI/10,
+    eyeRotation:Math.PI*0.7,
+    earRadius: 2,
+    earScaleY: 2,
+    earScaleZ:0.5,
+    earAngle: -Math.PI/8,
+    mouthRadius: 4,
+    mouthAngleX: Math.PI/20,
+    mouthRotationZ: Math.PI*0.99,
+    mouthTube: 0.35,
+    mouthRadialSegment: 10,
+    mouthTubularSegment: 200,
+    mouthArc: 2.4,
+    armLength:10,
+    fingerLength:3,
+    legLength:8,
+    footRadius:2,
+    footStretchZ:1.5
+}
+var textureGlobal; // textures for mapping images
+var scene = new THREE.Scene(); 
+var renderer = new THREE.WebGLRenderer();
+TW.mainInit(renderer,scene);
+
+var table = new THREE.Object3D();
+
+// create a box for the table
+var tableGeom = new THREE.BoxGeometry(
+                    params.tableWidth, params.tableHeight, params.tableDepth);
+var tableMat = new THREE.MeshPhongMaterial({color: new THREE.Color("gray")});
+var tableMesh = new THREE.Mesh(tableGeom, tableMat);
+
+table.add(tableMesh);
+
+// create the poles for the table
+var pole = new THREE.CylinderGeometry( params.poleRadius,
+                                        params.poleRadius,
+                                        params.poleHeight );
+
+var poleMat = new THREE.MeshPhongMaterial({color:new THREE.Color("grey")});
+var poleMesh1 = new THREE.Mesh(pole,poleMat); // left
+var poleMesh2 = new THREE.Mesh(pole,poleMat); // right
+
+// set the position of the poles
+poleMesh1.position.set( -params.tableWidth/2 + params.poleRadius,
+                        params.poleHeight/2,
+                        params.tableDepth/2 - params.poleRadius );
+
+poleMesh2.position.set( params.tableWidth/2 - params.poleRadius,
+                        params.poleHeight/2,
+                        params.tableDepth/2-params.poleRadius );
+table.add(poleMesh1);
+table.add(poleMesh2);
+
+function addTextureCoords (signGeom, textures) {
+    /* add coordinates to map textures onto */
+    if( ! signGeom instanceof THREE.Geometry ) {
+        throw "not a THREE.Geometry: "+signGeom;
+    }
+    // array of face descriptors
+    var UVs = [];
+    function faceCoords(as,at, bs,bt, cs,ct) {
+        UVs.push( [ new THREE.Vector2(as,at),
+                    new THREE.Vector2(bs,bt),
+                    new THREE.Vector2(cs,ct) ] );
+    }
+    // right (face 0-1)
+    faceCoords(1,0, 0,0, 1,1);
+    faceCoords(1,1, 0,0, 0,1);
+    // left (faces 2-3)
+    faceCoords(1,0, 0,1, 0,0);
+    faceCoords(1,0, 1,1, 0,1);
+    // top (faces 4-5)
+    faceCoords(1,1, 1,0, 0,1);
+    faceCoords(0,1, 1,1, 1,0);
+    // bottom (faces 6-7)
+    faceCoords(1,1, 1,1, 0,0);
+    faceCoords(1,1, 0,1, 0,0);
+    // front (faces 8-9)
+    faceCoords(0,1, 0,0, 1,1);
+    faceCoords(0,0, 1,0, 1,1);
+    // back (faces 10-11)
+    faceCoords(0,0, 1,0, 0,1);
+    faceCoords(1,0, 1,1, 0,1);
+
+    // attach this to the geometry
+    signGeom.faceVertexUvs = [ UVs ];
+}
+
+
+function createSign(textures) {
+    /* Create the sign for the nightmarket stand.
+     * @param textures - list of textures */
+    var signGeom = new THREE.BoxGeometry(
+                    params.tableWidth, params.signHeight, params.signDepth);
+    
+    addTextureCoords(signGeom, textures);
+    var materials = [ 
+        new THREE.MeshPhongMaterial( {color: 0xffffff, map: textures[0]} ),
+        new THREE.MeshPhongMaterial( {color: 0xffffff, map: textures[1]} ) ];
+    
+    // only map the sign name on the front
+    for (var i=0; i<12; i++) {
+        if (i == 8 || i == 9) {
+            signGeom.faces[i].materialIndex = 0;
+            signGeom.faces[i].materialIndex = 0;
+        } else {
+            signGeom.faces[i].materialIndex = 1;
+        }
+    }
+    textures.needsUpdate = true;
+    var signMesh = new THREE.Mesh(signGeom, materials);
+    signMesh.position.set(0, params.poleHeight + params.signHeight/2, 
+                        params.tableDepth/2 - params.signDepth / 4);
+
+    table.add(signMesh);
+}
+
+// create an object for the stand as a whole so it is easier to move
+var marketStand = new THREE.Object3D();
+marketStand.add(table);
+
+
+// ===================
+// food
+// ===================
+
+function createStick() {
+    /* Creates the stick for the candy. */
+    var stickGeom = new THREE.CylinderGeometry(
+                        0.2, 0.2, params.candyStickHeight);
+    var stickMat = new THREE.MeshPhongMaterial(
+        {color:new THREE.Color("brown")});
+    var stickMesh = new THREE.Mesh(stickGeom, stickMat);
+    return stickMesh;
+}
+
+function createBall() {
+    /* Creates one of the red spherical candies. */
+    var ballGeom = new THREE.SphereGeometry(1);
+    var ballMat = new THREE.MeshPhongMaterial(
+        {color:new THREE.Color("red"), side: THREE.DoubleSide});
+    var ballMesh = new THREE.Mesh(ballGeom, ballMat);
+    return ballMesh;
+}
+
+
+function createCandy() {
+    /* Creates one instance of an entire candy, consisting of 
+     * a stick and red candies. */
+
+    var candy = new THREE.Object3D();
+    candy.add(createStick());
+    ball1 = createBall();
+    ball1.position.y = -params.candyStickHeight/2 + 5;
+    candy.add(ball1);
+
+    ball2 = createBall();
+    ball2.position.y = -params.candyStickHeight/2 + 7;
+    candy.add(ball2);
+
+    ball2 = createBall();
+    ball2.position.y = -params.candyStickHeight/2 + 9;
+    candy.add(ball2);
+
+    return candy;
+}
+
+// add candies to the stand
+for (var j=0; j<14; j++) {
+    var candy = createCandy();
+    table.add(candy);
+    candy.position.set(
+        j*-5, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+}
+
+
+
+
+marketStand.position.set(0,-20,0);
+scene.add(marketStand);
+
+// ===================
+//add peppa pig
+//====================
+function makeHead(params,material){
+    var head = new THREE.Object3D();
+    var headGeom = new THREE.SphereGeometry(params.headRadius,32,16);
+    var headMesh = new THREE.Mesh(headGeom,material);
+    head.add(headMesh);
+    return head
+}
+function makeNose(params,material){
+    var noseGeom = new THREE.CylinderGeometry(params.noseRadiusTop,params.noseRadiusBottom,params.noseHeight);
+    var noseMesh = new THREE.Mesh(noseGeom,material);
+    noseMesh.position.set(params.nosePositionX,params.nosePositionY,0);
+    noseMesh.rotation.z = params.noseRotationZ;
+    return noseMesh
+}
+//return an eye mesh
+function createEye(params,eyeMaterial,pupilMaterial) {
+    var eyeBall = new THREE.Object3D();
+    var radius = params.eyeRadius;
+    var eyeGeometry = new THREE.SphereGeometry(radius,10,10);
+    var eyeMesh = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    var pupilGeometry = new THREE.SphereGeometry(radius,64,32,0,Math.PI*2,0,Math.PI/6);
+    var pupilMesh = new THREE.Mesh(pupilGeometry,pupilMaterial);
+    eyeBall.add(eyeMesh,pupilMesh);
+    eyeBall.rotation.x = params.eyeRotation;
+    return eyeBall;
+    }
+//create and add eye to the head
+function addEye(head,params,side,eyeMaterial,pupilMaterial) {
+    var eyeframe = new THREE.Object3D();
+    var eye = createEye(params,eyeMaterial,pupilMaterial);
+    var radius = params.headRadius;
+    eye.position.z = radius;     // within the eyeframe
+    var angleXL = params.eyeAngleXL;
+    var angleYL = params.eyeAngleYL;
+    var angleXR = params.eyeAngleXR;
+    var angleYR = params.eyeAngleYR;
+    if(side == 1){
+        eyeframe.rotation.x = angleXL;
+        eyeframe.rotation.y = angleYL;
+}
+    else{
+        eyeframe.rotation.x = angleXR;
+        eyeframe.rotation.y = angleYR;
+    }
+    eyeframe.add(eye);
+    head.add(eyeframe);
+    return head;
+    }
+// create and return a Mesh for an ear
+function createEar(params,material) {
+    var radius = params.earRadius;
+    var earGeometry = new THREE.SphereGeometry(radius,10,10);
+    var ear = new THREE.Mesh(earGeometry, material);
+    // make the ear flat like a disk
+    ear.scale.z = params.earScaleZ;
+    ear.scale.y = params.earScaleY;
+    return ear;
+}
+
+// add the ear to the head
+function addEar(head,params,side,material) {
+    var earframe = new THREE.Object3D();
+    var ear = createEar(params,material);
+    var radius = params.headRadius;
+    var angle = params.earAngle;
+    // move the ear to the surface of the head depending on which side it is on
+    if(side == 1){
+        ear.position.x = radius/1.5; // within the earframe
+        ear.position.y = params.headRadius;
+    }
+    else{
+        ear.position.x = radius/8; // within the earframe
+        ear.position.y = params.headRadius*1.2;
+    }
+    ear.rotation.z = angle;
+    earframe.add(ear);
+    head.add(earframe);
+    return head;
+}
+//create a dimple for peppa
+function createDimple(params,material){
+    var radius = params.headRadius;
+    var dimpleGeom = new THREE.SphereGeometry(radius,64,32,0,Math.PI*2,0,Math.PI/10);
+    var dimpleMesh = new THREE.Mesh(dimpleGeom,material);
+    return dimpleMesh;
+}
+function addDimple(head,params,material){
+    var dimpleFrame = new THREE.Object3D();
+    var dimple = createDimple(params,material);
+    dimpleFrame.add(dimple);
+    dimpleFrame.rotation.z = params.dimpleAngleZ;
+    dimpleFrame.rotation.x = params.dimpleAngleX;
+   // dimpleFrame.rotation.y = params.dimpleAngleY;
+    head.add(dimpleFrame);
+    return head;
+}
+// create and return a Mesh for a mouth
+function createMouth(params,material) {
+    var radius = params.mouthRadius;
+    var mouthGeometry = new THREE.TorusGeometry(radius,params.mouthTube,params.mouthRadialSegment,params.mouthTubularSegment,params.mouthArc);
+    var mouthMesh = new THREE.Mesh(mouthGeometry, material);
+    mouthMesh.rotation.z = params.mouthRotationZ;
+    return mouthMesh;
+}
+
+//adds the mouth object to the head
+function addMouth(head,params,material) {    
+    var mouthFrame = new THREE.Object3D();
+    var radius = params.headRadius;
+    var mouth = createMouth(params,material);
+    mouthFrame.add(mouth);
+    mouthFrame.position.z = radius;
+    mouthFrame.rotation.x = params.mouthAngleX;
+    head.add(mouthFrame);
+    return head;
+}
+
+function createBody(params,material){
+    var radius = params.headRadius*1.4;
+    var bodyGeom = new THREE.SphereGeometry(radius,64,32,0,Math.PI*2,0,Math.PI/2,true);
+    var bodyMesh = new THREE.Mesh(bodyGeom,material);
+    var bodyBottomGeom = new THREE.CircleGeometry(radius,32);
+    var bodyBottomMesh = new THREE.Mesh(bodyBottomGeom,material);
+    bodyBottomMesh.rotation.x = Math.PI/2;
+    bodyMesh.add(bodyBottomMesh);
+    bodyMesh.scale.y = params.bodyScaleY;
+    return bodyMesh;
+}
+function addBody(head,body,params){
+    var bodyObj = new THREE.Object3D();
+    bodyObj.add(body);
+    bodyObj.position.y = -params.headRadius*2.5;
+    head.add(bodyObj);
+    return head;
+}
+
+function createArm(params,material){
+    var radius = params.armRadius;
+    var fingerHeight = params.fingerLength;
+    var fingerPositionY = params.fingerPosY;
+    var angle = params.fingerRotation;
+    var mainArmGeom = new THREE.CylinderGeometry(radius,radius,params.armLength,64);
+    var finger1Geom = new THREE.CylinderGeometry(radius,radius,fingerHeight,64);
+    var finger2Geom = new THREE.CylinderGeometry(radius,radius,fingerHeight,64);
+    var mainArmMesh = new THREE.Mesh(mainArmGeom,material);
+    var finger1Mesh = new THREE.Mesh( finger1Geom,material);
+    var finger2Mesh = new THREE.Mesh(finger2Geom,material);
+    var displacement = Math.sin(angle)*fingerHeight/2;
+    finger1Mesh.rotation.z = angle;
+    finger1Mesh.position.x = displacement;
+    finger1Mesh.position.y = fingerPositionY;
+    finger2Mesh.rotation.z = -angle;
+    finger2Mesh.position.x = -displacement;
+    finger2Mesh.position.y = fingerPositionY;
+    mainArmMesh.add(finger1Mesh,finger2Mesh);
+    return mainArmMesh;
+}
+
+function addArm(body,side,params,material){
+    var arm = createArm(params,material);
+    arm.rotation.z = side*params.armRotation;
+    arm.position.x = side*params.headRadius*1.5;
+    arm.position.y = params.headRadius;
+    body.add(arm);
+    return body;
+}
+//create a leg
+function createLeg(params,bodyMaterial,shoeMaterial){
+    var radius = params.legRadius;
+    var legGeom = new THREE.CylinderGeometry(radius,radius,params.legHeight,64);
+    var legMesh = new THREE.Mesh(legGeom,bodyMaterial);
+    var shoeGeom = new THREE.SphereGeometry(params.footRadius,32,64);
+    var shoeMesh = new THREE.Mesh(shoeGeom,shoeMaterial);
+    shoeMesh.scale.set(params.footScaleX,params.footScaleY,params.footScaleZ);
+   // shoeMesh.scale.z = params.footScaleZ;
+    shoeMesh.position.set(0,-params.legHeight/2,params.footPositionZ);
+    legMesh.add(shoeMesh);
+    return legMesh;
+}
+//add the leg to the body
+function addLeg(body,side,params,bodyMaterial,shoeMaterial){
+    var legPositionX = params.headRadius/2;
+    var legPositionY = -params.legHeight/2;
+    var leg = createLeg(params,bodyMaterial,shoeMaterial);
+    leg.position.set(legPositionX*side,legPositionY,0);
+    body.add(leg);
+    return body;
+
+}
+//construct a peppa pig
+function makePeppa(params,size,bodyColor,dressColor,shoeColor){
+    var bodyMaterial = new THREE.MeshBasicMaterial({color: bodyColor});
+    var dressMaterial = new THREE.MeshBasicMaterial({color: 0xf5574c});
+    var shoeMaterial = new THREE.MeshBasicMaterial({color: shoeColor});
+    var eyeMaterial = new THREE.MeshBasicMaterial({color: "white"});
+    var mouthMaterial = new THREE.MeshBasicMaterial({color: 0xf54296});
+    var dimpleMaterial = new THREE.MeshBasicMaterial({color:0xf28fce});
+    var pupilMaterial = new THREE.MeshBasicMaterial({color: "black"});
+
+    var peppa = new THREE.Object3D();
+    //make head
+    var head = makeHead(params,bodyMaterial);
+    var noseMesh = makeNose(params,bodyMaterial);
+    addDimple(head,params,dimpleMaterial);
+    addMouth(head,params,mouthMaterial);
+    head.add(noseMesh);
+    addEye(head,params,1,eyeMaterial,pupilMaterial);
+    addEye(head,params,-1,eyeMaterial,pupilMaterial);
+    addEar(head,params,1,bodyMaterial);
+    addEar(head,params,-1,bodyMaterial);
+    peppa.add(head);
+    //create the entire body
+    var body = createBody(params,dressMaterial);
+    addArm(body,1,params,bodyMaterial);
+    addArm(body,-1,params,bodyMaterial);
+    addLeg(body,1,params,bodyMaterial,shoeMaterial);
+    addLeg(body,-1,params,bodyMaterial,shoeMaterial);
+    //add the completed body to the head
+    addBody(head,body,params,dressMaterial);
+    return peppa;
+    }
+var peppaPig = makePeppa(params,1,0xf2a5c9,"red","black");
+peppaPig.position.set(-params.tableWidth/1.5,0,0);
+scene.add(peppaPig);
+
+TW.render();
+
+// ===================
+// textures
+// ===================
+
+TW.loadTextures(["sign.png", "bg.png"], 
+                function (textures) {
+                    textureGlobal = textures;
+                    createSign(textures);
+                    TW.render();
+                } );
+
+
+// ===================
+// lighting
+// ===================
+var ambLight = new THREE.AmbientLight(0xffffff);
+scene.add(ambLight);
+
+var dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+dirLight.position.set(0, params.poleHeight, 
+                        params.tableDepth/2 - params.signDepth / 2);
+dirLight.target.position.set(0, 0, -params.tableDepth/16);
+scene.add(dirLight);
+scene.add(dirLight.target);
+
+
+// TW.render();
+
+var state = TW.cameraSetup(renderer,
+                           scene,
+                           {minx: -50, maxx: 50,
+                            miny: -50, maxy: 50,
+                            minz: -50, maxz: 50});
+
+</script>
+</body>
+</html>
