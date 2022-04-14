@@ -34,7 +34,7 @@ Creates a static image of a nightmarket food stand.
 </head>
 <body>
 <h1>Nightmarket</h1>
-<p> <b>Name</b>: Audrea Huang and Nanxi Liu<br>
+<p> <b>Name</b>: Nanxi Liu and Audrea Huang<br>
     <b>Assignment 6:</b> Nightmarket<br>
     <b>Date</b>: April 15, 2022<br>
 <br></p>
@@ -198,6 +198,7 @@ function createSign(textures) {
 }
 
 // create an object for the stand as a whole so it is easier to move
+// origin is at center of table
 var marketStand = new THREE.Object3D();
 marketStand.add(table);
 
@@ -256,14 +257,9 @@ for (var j=0; j<14; j++) {
 }
 
 
-
-
-marketStand.position.set(0,-20,0);
-scene.add(marketStand);
-
 // ===================
-//add peppa pig
-//====================
+// add peppa pig
+// ====================
 function makeHead(params,material){
     var head = new THREE.Object3D();
     var headGeom = new THREE.SphereGeometry(params.headRadius,32,16);
@@ -486,9 +482,12 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor){
     return peppa;
     }
 var peppaPig = makePeppa(params,1,0xf2a5c9,"red","black");
-peppaPig.position.set(-params.tableWidth/1.5,0,0);
-scene.add(peppaPig);
+// peppaPig.position.set(-params.tableWidth/1.5,0,0);
+peppaPig.position.set(0, params.tableHeight*1.5, -params.tableDepth);
+marketStand.add(peppaPig);
 
+marketStand.position.set(0,-20,0);
+scene.add(marketStand);
 TW.render();
 
 // ===================
