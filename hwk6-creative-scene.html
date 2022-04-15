@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- 
 Name: Audrea Huang and Nanxi Liu
-Assignment 6: Nightmarket (static rendition)
+Assignment 6: Creative Scene
 Date: April 15, 2022
 Creates a static image of a nightmarket food stand.
 -->
@@ -35,8 +35,16 @@ Creates a static image of a nightmarket food stand.
 <body>
 <h1>Nightmarket</h1>
 <p> <b>Name</b>: Nanxi Liu and Audrea Huang<br>
-    <b>Assignment 6:</b> Nightmarket<br>
+    <b>Assignment 6:</b> Creative Scene<br>
     <b>Date</b>: April 15, 2022<br>
+    <b>Description</b>: The current state of the program creates a static scene of
+    a candy stand at a nightmarket. To enrich the scene for the final project, we
+    would like to add animation for Peppa making and selling the food as well as 
+    customers coming to the booth and eating on stools. In order to avoid the stand
+    feeling isolated, we will also add in the background flickering lights to 
+    represent other nightmarket stands. The user can interact with the scene by 
+    dragging the candies to move them and changing the colors of the stools and table
+    with mouse clicks.
 <br></p>
 
 <script id="prog">
@@ -45,7 +53,7 @@ var params = {
     poleHeight: 50,
     tableWidth: 150,
     tableHeight: 20,
-    tableDepth: 60,
+    tableDepth: 45,
     signHeight: 20,
     signDepth: 10,
     candyStickHeight: 8,
@@ -100,6 +108,7 @@ var params = {
 }
 var textureGlobal; // textures for mapping images
 var scene = new THREE.Scene(); 
+scene.background = new THREE.Color( 0x15161A );
 var renderer = new THREE.WebGLRenderer();
 TW.mainInit(renderer,scene);
 
@@ -226,10 +235,10 @@ function createBall() {
     return ballMesh;
 }
 
-
 function createCandy() {
     /* Creates one instance of an entire candy, consisting of 
-     * a stick and red candies. */
+     * a stick and red candies.
+     @return candy object */
 
     var candy = new THREE.Object3D();
     candy.add(createStick());
@@ -249,45 +258,81 @@ function createCandy() {
 }
 
 // add candies to the stand
-for (var j=0; j<14; j++) {
-    var candy = createCandy();
-    table.add(candy);
-    candy.position.set(
-        j*-5, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+for (var j=0; j<10; j++) {
+    // add candies on the left side of the table
+    var candyL = createCandy();
+    table.add(candyL);
+    // increase position to the left
+    candyL.position.set(
+        j*-5 - params.tableDepth/3, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+
+    // add candies on the right
+    var candyR = createCandy();
+    table.add(candyR);
+    candyR.position.set(
+        j*5 + params.tableDepth/4, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+
 }
 
 
 // ===================
 // add peppa pig
 // ====================
-function makeHead(params,material){
+function makeHead(params,material) {
+    /* Make a head for Peppa 
+     * @param params - collection of dimensions to draw Peppa
+     * @param material - color of head
+     * @return THREE.Object3D for the head
+     */
     var head = new THREE.Object3D();
     var headGeom = new THREE.SphereGeometry(params.headRadius,32,16);
     var headMesh = new THREE.Mesh(headGeom,material);
     head.add(headMesh);
     return head
 }
-function makeNose(params,material){
-    var noseGeom = new THREE.CylinderGeometry(params.noseRadiusTop,params.noseRadiusBottom,params.noseHeight);
+
+function makeNose(params,material) {
+    /* Makes, positions, and rotates a nose
+     * @param params - collection of dimensions to draw Peppa
+     * @param material - color of nose
+     * @return THREE.Mesh for the nose
+     */
+    var noseGeom = new THREE.CylinderGeometry(
+        params.noseRadiusTop,params.noseRadiusBottom,params.noseHeight);
     var noseMesh = new THREE.Mesh(noseGeom,material);
     noseMesh.position.set(params.nosePositionX,params.nosePositionY,0);
     noseMesh.rotation.z = params.noseRotationZ;
     return noseMesh
 }
-//return an eye mesh
+
 function createEye(params,eyeMaterial,pupilMaterial) {
+    /* Makes and rotates an eye
+     * @param params - collection of dimensions to draw Peppa
+     * @param eyeMaterial - outer color of eye
+     * @param pupilMaterial - inner color of eye
+     * @return THREE.Object3D for the entire eye
+     */
     var eyeBall = new THREE.Object3D();
     var radius = params.eyeRadius;
     var eyeGeometry = new THREE.SphereGeometry(radius,10,10);
     var eyeMesh = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    var pupilGeometry = new THREE.SphereGeometry(radius,64,32,0,Math.PI*2,0,Math.PI/6);
+    var pupilGeometry = new THREE.SphereGeometry(
+        radius,64,32,0,Math.PI*2,0,Math.PI/6);
     var pupilMesh = new THREE.Mesh(pupilGeometry,pupilMaterial);
     eyeBall.add(eyeMesh,pupilMesh);
     eyeBall.rotation.x = params.eyeRotation;
     return eyeBall;
-    }
-//create and add eye to the head
+}
+
 function addEye(head,params,side,eyeMaterial,pupilMaterial) {
+    /* Creates and adds an eye to the head
+     * @param head {THREE.Object3D} - head object
+     * @param params - collection of dimensions to draw Peppa
+     * @param side - specifies the side of the head to add the eye to
+     *               1 for left, -1 for right
+     * @param eyeMaterial - outer color of eye
+     * @param pupilMaterial - inner color of eye
+     */
     var eyeframe = new THREE.Object3D();
     var eye = createEye(params,eyeMaterial,pupilMaterial);
     var radius = params.headRadius;
@@ -296,20 +341,23 @@ function addEye(head,params,side,eyeMaterial,pupilMaterial) {
     var angleYL = params.eyeAngleYL;
     var angleXR = params.eyeAngleXR;
     var angleYR = params.eyeAngleYR;
-    if(side == 1){
+    if (side == 1) {
         eyeframe.rotation.x = angleXL;
         eyeframe.rotation.y = angleYL;
 }
-    else{
+    else {
         eyeframe.rotation.x = angleXR;
         eyeframe.rotation.y = angleYR;
     }
     eyeframe.add(eye);
     head.add(eyeframe);
-    return head;
-    }
-// create and return a Mesh for an ear
+}
+
 function createEar(params,material) {
+    /* create and return a Mesh for an ear
+     * @param params - collection of dimensions to draw Peppa
+     * @param material - color of ear
+     * @return THREE.Mesh for the ear */
     var radius = params.earRadius;
     var earGeometry = new THREE.SphereGeometry(radius,10,10);
     var ear = new THREE.Mesh(earGeometry, material);
@@ -319,18 +367,23 @@ function createEar(params,material) {
     return ear;
 }
 
-// add the ear to the head
 function addEar(head,params,side,material) {
+    /* Creates and adds an ear to the head
+     * @param head {THREE.Object3D} - head object
+     * @param params - collection of dimensions to draw Peppa
+     * @param side - specifies the side of the head to add the ear to
+     *               1 for left, -1 for right
+     * @param material - color of ear */
     var earframe = new THREE.Object3D();
     var ear = createEar(params,material);
     var radius = params.headRadius;
     var angle = params.earAngle;
     // move the ear to the surface of the head depending on which side it is on
-    if(side == 1){
+    if (side == 1) {
         ear.position.x = radius/1.5; // within the earframe
         ear.position.y = params.headRadius;
     }
-    else{
+    else {
         ear.position.x = radius/8; // within the earframe
         ear.position.y = params.headRadius*1.2;
     }
@@ -339,14 +392,24 @@ function addEar(head,params,side,material) {
     head.add(earframe);
     return head;
 }
-//create a dimple for peppa
-function createDimple(params,material){
+
+function createDimple(params,material) {
+    /* create a dimple for peppa
+     * @param params - collection of dimensions to draw Peppa
+     * @param material - color of dimple 
+     * @return THREE.Mesh for the dimple */
     var radius = params.headRadius;
-    var dimpleGeom = new THREE.SphereGeometry(radius,64,32,0,Math.PI*2,0,Math.PI/10);
+    var dimpleGeom = new THREE.SphereGeometry(
+        radius,64,32,0,Math.PI*2,0,Math.PI/10);
     var dimpleMesh = new THREE.Mesh(dimpleGeom,material);
     return dimpleMesh;
 }
-function addDimple(head,params,material){
+
+function addDimple(head,params,material) {
+    /* Adds a dimple to the head
+     * @param head {THREE.Object3D} - head object
+     * @param params - collection of dimensions to draw Peppa
+     * @param material - color of dimple */
     var dimpleFrame = new THREE.Object3D();
     var dimple = createDimple(params,material);
     dimpleFrame.add(dimple);
@@ -354,19 +417,27 @@ function addDimple(head,params,material){
     dimpleFrame.rotation.x = params.dimpleAngleX;
    // dimpleFrame.rotation.y = params.dimpleAngleY;
     head.add(dimpleFrame);
-    return head;
 }
-// create and return a Mesh for a mouth
+
 function createMouth(params,material) {
+    /* Create and return a Mesh for a mouth 
+     * @param params - collection of dimensions for Peppa
+     * @param material - color of the mouth
+     * @return a Mesh for the mouth */
     var radius = params.mouthRadius;
-    var mouthGeometry = new THREE.TorusGeometry(radius,params.mouthTube,params.mouthRadialSegment,params.mouthTubularSegment,params.mouthArc);
+    var mouthGeometry = new THREE.TorusGeometry(
+        radius,params.mouthTube, params.mouthRadialSegment,
+        params.mouthTubularSegment,params.mouthArc);
     var mouthMesh = new THREE.Mesh(mouthGeometry, material);
     mouthMesh.rotation.z = params.mouthRotationZ;
     return mouthMesh;
 }
 
-//adds the mouth object to the head
-function addMouth(head,params,material) {    
+function addMouth(head,params,material) {  
+    /* adds the mouth object to the head
+     * @param head {THREE.Object3D} - head object
+     * @param params - collection of dimensions to draw Peppa
+     * @param material - color of mouth */
     var mouthFrame = new THREE.Object3D();
     var radius = params.headRadius;
     var mouth = createMouth(params,material);
@@ -374,12 +445,16 @@ function addMouth(head,params,material) {
     mouthFrame.position.z = radius;
     mouthFrame.rotation.x = params.mouthAngleX;
     head.add(mouthFrame);
-    return head;
 }
 
-function createBody(params,material){
+function createBody(params,material) {
+    /* Creates the body of Peppa
+     * @param params - collection of dimensions for Peppa
+     * @param material - color of the body
+     * @return a Mesh for the body */
     var radius = params.headRadius*1.4;
-    var bodyGeom = new THREE.SphereGeometry(radius,64,32,0,Math.PI*2,0,Math.PI/2,true);
+    var bodyGeom = new THREE.SphereGeometry(
+        radius,64,32,0,Math.PI*2,0,Math.PI/2,true);
     var bodyMesh = new THREE.Mesh(bodyGeom,material);
     var bodyBottomGeom = new THREE.CircleGeometry(radius,32);
     var bodyBottomMesh = new THREE.Mesh(bodyBottomGeom,material);
@@ -388,22 +463,33 @@ function createBody(params,material){
     bodyMesh.scale.y = params.bodyScaleY;
     return bodyMesh;
 }
-function addBody(head,body,params){
+
+function addBody(head,body,params) {
+    /* adds the body object to the head
+     * @param head {THREE.Object3D} - head object
+     * @param body {THREE.Mesh} - body mesh from createBody()
+     * @param params - collection of dimensions for the body position */
     var bodyObj = new THREE.Object3D();
     bodyObj.add(body);
     bodyObj.position.y = -params.headRadius*2.5;
     head.add(bodyObj);
-    return head;
 }
 
-function createArm(params,material){
+function createArm(params,material) {
+    /* Creates an arm for Peppa, which consists of an arm and 2 fingers
+     * @param params - collection containing arm measurements for Peppa
+     * @param material - color of the arm
+     * @return a Mesh for the arm */
     var radius = params.armRadius;
     var fingerHeight = params.fingerLength;
     var fingerPositionY = params.fingerPosY;
     var angle = params.fingerRotation;
-    var mainArmGeom = new THREE.CylinderGeometry(radius,radius,params.armLength,64);
-    var finger1Geom = new THREE.CylinderGeometry(radius,radius,fingerHeight,64);
-    var finger2Geom = new THREE.CylinderGeometry(radius,radius,fingerHeight,64);
+    var mainArmGeom = new THREE.CylinderGeometry(
+                        radius,radius,params.armLength,64);
+    var finger1Geom = new THREE.CylinderGeometry(
+                        radius,radius,fingerHeight,64);
+    var finger2Geom = new THREE.CylinderGeometry(
+                        radius,radius,fingerHeight,64);
     var mainArmMesh = new THREE.Mesh(mainArmGeom,material);
     var finger1Mesh = new THREE.Mesh( finger1Geom,material);
     var finger2Mesh = new THREE.Mesh(finger2Geom,material);
@@ -418,39 +504,62 @@ function createArm(params,material){
     return mainArmMesh;
 }
 
-function addArm(body,side,params,material){
+function addArm(body,side,params,material) {
+    /* adds the arm to the body
+     * @param body {THREE.Mesh} - body mesh
+     * @param side - specifies the side of the head to add the arm to
+     *               1 for left, -1 for right
+     * @param params - collection of dimensions for the arm
+     * @param material - color of arm */
     var arm = createArm(params,material);
     arm.rotation.z = side*params.armRotation;
     arm.position.x = side*params.headRadius*1.5;
     arm.position.y = params.headRadius;
     body.add(arm);
-    return body;
 }
-//create a leg
-function createLeg(params,bodyMaterial,shoeMaterial){
+
+function createLeg(params,bodyMaterial,shoeMaterial) {
+    /* Creates a leg for Peppa
+     * @param params - collection containing arm measurements for Peppa
+     * @param bodyMaterial - color of the leg
+     * @param shoeMaterial - color of the shoe
+     * @return a Mesh for the leg */
     var radius = params.legRadius;
-    var legGeom = new THREE.CylinderGeometry(radius,radius,params.legHeight,64);
+    var legGeom = new THREE.CylinderGeometry(
+                        radius,radius,params.legHeight,64);
     var legMesh = new THREE.Mesh(legGeom,bodyMaterial);
     var shoeGeom = new THREE.SphereGeometry(params.footRadius,32,64);
     var shoeMesh = new THREE.Mesh(shoeGeom,shoeMaterial);
     shoeMesh.scale.set(params.footScaleX,params.footScaleY,params.footScaleZ);
-   // shoeMesh.scale.z = params.footScaleZ;
+    // shoeMesh.scale.z = params.footScaleZ;
     shoeMesh.position.set(0,-params.legHeight/2,params.footPositionZ);
     legMesh.add(shoeMesh);
     return legMesh;
 }
-//add the leg to the body
-function addLeg(body,side,params,bodyMaterial,shoeMaterial){
+
+function addLeg(body,side,params,bodyMaterial,shoeMaterial) {
+    /* adds a leg to the body
+     * @param body {THREE.Mesh} - body mesh
+     * @param side - specifies the side of the head to add the leg to
+     *               1 for left, -1 for right
+     * @param params - collection of dimensions for the leg
+     * @param bodyMaterial - color of the leg
+     * @param shoeMaterial - color of the shoe */
     var legPositionX = params.headRadius/2;
     var legPositionY = -params.legHeight/2;
     var leg = createLeg(params,bodyMaterial,shoeMaterial);
     leg.position.set(legPositionX*side,legPositionY,0);
     body.add(leg);
-    return body;
-
 }
-//construct a peppa pig
-function makePeppa(params,size,bodyColor,dressColor,shoeColor){
+
+function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
+    /* construct a peppa pig
+     * @param params - collection of dimensions
+     * @param size - scale of peppa
+     * @param bodyColor - color of body
+     * @param dressColor - color of dress
+     * @param shoeMaterial - color of the shoe 
+     * @return {THREE.Object3D} peppa object */
     var bodyMaterial = new THREE.MeshBasicMaterial({color: bodyColor});
     var dressMaterial = new THREE.MeshBasicMaterial({color: 0xf5574c});
     var shoeMaterial = new THREE.MeshBasicMaterial({color: shoeColor});
@@ -460,7 +569,7 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor){
     var pupilMaterial = new THREE.MeshBasicMaterial({color: "black"});
 
     var peppa = new THREE.Object3D();
-    //make head
+    // make head
     var head = makeHead(params,bodyMaterial);
     var noseMesh = makeNose(params,bodyMaterial);
     addDimple(head,params,dimpleMaterial);
@@ -471,18 +580,18 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor){
     addEar(head,params,1,bodyMaterial);
     addEar(head,params,-1,bodyMaterial);
     peppa.add(head);
-    //create the entire body
+    // create the entire body
     var body = createBody(params,dressMaterial);
     addArm(body,1,params,bodyMaterial);
     addArm(body,-1,params,bodyMaterial);
     addLeg(body,1,params,bodyMaterial,shoeMaterial);
     addLeg(body,-1,params,bodyMaterial,shoeMaterial);
-    //add the completed body to the head
+    // add the completed body to the head
     addBody(head,body,params,dressMaterial);
     return peppa;
-    }
+}
+
 var peppaPig = makePeppa(params,1,0xf2a5c9,"red","black");
-// peppaPig.position.set(-params.tableWidth/1.5,0,0);
 peppaPig.position.set(0, params.tableHeight*1.5, -params.tableDepth);
 marketStand.add(peppaPig);
 
@@ -493,14 +602,12 @@ TW.render();
 // ===================
 // textures
 // ===================
-
 TW.loadTextures(["sign.png", "bg.png"], 
                 function (textures) {
                     textureGlobal = textures;
                     createSign(textures);
                     TW.render();
                 } );
-
 
 // ===================
 // lighting
@@ -514,9 +621,6 @@ dirLight.position.set(0, params.poleHeight,
 dirLight.target.position.set(0, 0, -params.tableDepth/16);
 scene.add(dirLight);
 scene.add(dirLight.target);
-
-
-// TW.render();
 
 var state = TW.cameraSetup(renderer,
                            scene,
