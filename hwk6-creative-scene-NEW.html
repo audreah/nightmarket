@@ -49,7 +49,7 @@ var params = {
     tableHeight: 20,
     tableDepth: 45,
     signHeight: 20,
-    signLightRadius: 1,
+    signLightRadius: 1.3,
     signDepth: 10,
     candyStickHeight: 8,
     //params for arms
@@ -185,8 +185,8 @@ function createSignLight() {
     var lightbulb = new THREE.Mesh(lightbulbGeom, lightMaterial);
     lightbulbObj.add(lightbulb);
 
-    // var light = new THREE.PointLight(0xffffff, 1, params.signLightRadius);
-    // lightbulbObj.add( light );
+    var light = new THREE.PointLight(0xffffff, 1, params.signHeight);
+    lightbulbObj.add( light );
     return lightbulbObj;
 }
 
