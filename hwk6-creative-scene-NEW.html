@@ -1,9 +1,9 @@
 <!doctype html>
 <!-- 
 Name: Audrea Huang and Nanxi Liu
-Assignment 6: Creative Scene
-Date: April 15, 2022
-Creates a static image of a nightmarket food stand.
+Final Project: Version 1
+Date: April 29, 2022
+Creates an image of a nightmarket food stand.
 -->
 <html lang="en">
 <head>
@@ -35,16 +35,10 @@ Creates a static image of a nightmarket food stand.
 <body>
 <h1>Nightmarket</h1>
 <p> <b>Name</b>: Nanxi Liu and Audrea Huang<br>
-    <b>Assignment 6:</b> Creative Scene<br>
-    <b>Date</b>: April 15, 2022<br>
-    <b>Description</b>: The current state of the program creates a static scene of
-    a candy stand at a nightmarket. To enrich the scene for the final project, we
-    would like to add animation for Peppa making and selling the food as well as 
-    customers coming to the booth and eating on stools. In order to avoid the stand
-    feeling isolated, we will also add in the background flickering lights to 
-    represent other nightmarket stands. The user can interact with the scene by 
-    dragging the candies to move them and changing the colors of the stools and table
-    with mouse clicks.
+    <b>Final Project:</b> Version 1<br>
+    <b>Date</b>: April 29, 2022<br>
+    <b>Description</b>: This program creates a scene of
+    a candy stand at a nightmarket. 
 <br></p>
 
 <script id="prog">
@@ -55,6 +49,7 @@ var params = {
     tableHeight: 20,
     tableDepth: 45,
     signHeight: 20,
+    signLightRadius: 1,
     signDepth: 10,
     candyStickHeight: 8,
     //params for arms
@@ -180,34 +175,129 @@ function addTextureCoords (signGeom, textures) {
     signGeom.faceVertexUvs = [ UVs ];
 }
 
+function createSignLight() {
+    /* Creates a single lightbulb to be placed on the perimeter of the sign
+        * @return object for the lightbulb, which includes the bulb and the light */
+    var lightbulbObj = new THREE.Object3D();
+
+    var lightbulbGeom = new THREE.SphereGeometry(params.signLightRadius);
+    var lightMaterial = new THREE.MeshPhongMaterial({color: 0xf6d0a5});
+    var lightbulb = new THREE.Mesh(lightbulbGeom, lightMaterial);
+    lightbulbObj.add(lightbulb);
+
+    // var light = new THREE.PointLight(0xffffff, 1, params.signLightRadius);
+    // lightbulbObj.add( light );
+    return lightbulbObj;
+}
+
+var signObj = new THREE.Object3D();
+
+function addSignLightsTB(x, dx, y, z, numLights) {
+    /* adds the lights along the top and bottom of the sign 
+     * recursively by adding one each time and shifting the 
+     * position for the next one, starting at the top left corner 
+     * @param x - x coordinate of the current bulb
+     * @param dx - change in x position to add the next bulb
+     * @param y - y coordinate of the current bulb
+     * @param z - z coordinate as the sign's depth 
+     * @param numLights - number of bulbs */
+
+    if (numLights > 0) {
+        var lightTop = createSignLight();
+        lightTop.position.set(x,y,z);
+        signObj.add(lightTop);
+        addSignLightsTB(x+dx, dx, y, z, numLights-1);
+        var lightBottom = createSignLight();
+        lightBottom.position.set(x,-y,z);
+        signObj.add(lightBottom);
+    } 
+}
+
+function addSignLightsLR(x, y, dy, z, numLights) {
+    /* adds the lights along the left and right sides of the sign 
+     * recursively by adding one each time and shifting the 
+     * position for the next one, starting at the top left corner 
+     * @param x - x coordinate of the current bulb
+     * @param y - y coordinate of the current bulb
+     * @param dy - change in y position to add the next bulb
+     * @param z - z coordinate as the sign's depth 
+     * @param numLights - number of bulbs */
+
+    if (numLights > 0) {
+        var lightRight = createSignLight();
+        lightRight.position.set(x,y,z);
+        signObj.add(lightRight);
+
+        addSignLightsLR(x, y+dy, dy, z, numLights-1);
+
+        var lightLeft = createSignLight();
+        lightLeft.position.set(-x,y,z);
+        signObj.add(lightLeft);
+    }
+}
 
 function createSign(textures) {
-    /* Create the sign for the nightmarket stand.
+    /* Create the sign for the nightmarket stand, which consists of a box
+     * for the backing, text for the name in Chinese of the contents being
+     * sold, and lights along the perimeter.
      * @param textures - list of textures */
-    var signGeom = new THREE.BoxGeometry(
-                    params.tableWidth, params.signHeight, params.signDepth);
-    
-    addTextureCoords(signGeom, textures);
-    var materials = [ 
-        new THREE.MeshPhongMaterial( {color: 0xffffff, map: textures[0]} ),
-        new THREE.MeshPhongMaterial( {color: 0xffffff, map: textures[1]} ) ];
-    
-    // only map the sign name on the front
-    for (var i=0; i<12; i++) {
-        if (i == 8 || i == 9) {
-            signGeom.faces[i].materialIndex = 0;
-            signGeom.faces[i].materialIndex = 0;
-        } else {
-            signGeom.faces[i].materialIndex = 1;
-        }
-    }
-    textures.needsUpdate = true;
-    var signMesh = new THREE.Mesh(signGeom, materials);
-    signMesh.position.set(0, params.poleHeight + params.signHeight/2, 
-                        params.tableDepth/2 - params.signDepth / 4);
+    // var signObj = new THREE.Object3D();
 
-    table.add(signMesh);
+    var signGeom = new THREE.BoxGeometry(
+        params.tableWidth, params.signHeight, params.signDepth);
+    var signMat = new THREE.MeshPhongMaterial({color: 0x430d03});
+    var signMesh = new THREE.Mesh(signGeom, signMat);
+    signObj.add(signMesh);
+
+    /* Add lights around the sign. The spacing between each pair of lights 
+     * is calculated with respect to the size and number of lights */
+    var numLightsTB = 10; // number of lights on the top and bottom of the sign
+    var dx = (params.tableWidth - numLightsTB*params.signLightRadius) / 
+             (numLightsTB-1);
+    // start adding lights at the top left corner
+    addSignLightsTB(-params.tableWidth/2 + params.signLightRadius, dx, 
+        params.signHeight/2-params.signLightRadius, 
+        params.signDepth/2+1, numLightsTB);
+
+    // add lights on the left and right sides of the sign
+    var numLightsLR = 1;
+    // the vertical spacing between the lights is the amount of the sign's
+    // height that is not occupied by lightbulbs
+    var dy = (params.signHeight - (numLightsLR+2)*params.signLightRadius) /
+             (numLightsLR+1);
+    // start with the lower right bulb
+    addSignLightsLR(params.tableWidth/2-params.signLightRadius,
+        -params.signHeight/2 + params.signLightRadius*2 + dy, dy,
+        params.signDepth/2+1, numLightsLR);
+
+    // create the text for the sign
+    var loader = new THREE.FontLoader();
+
+    loader.load(
+        '851tegakizatsu_Regular.json',
+        function (font) {
+            var textGeom = new THREE.TextGeometry('糖葫蘆', 
+                                                    {font: font,
+                                                    size: 11,
+                                                    height: 2,
+                                                    } );
+            var textMat = new THREE.MeshBasicMaterial({color: 0xf6d0a5});
+            var textMesh = new THREE.Mesh(textGeom, textMat);
+            textMesh.position.set(-params.tableWidth/6, -params.signHeight/4, params.signDepth/2);
+            signObj.add(textMesh);
+            TW.render();
+        } );
+
+    signObj.position.set(0, params.poleHeight + params.signHeight / 2,
+        params.tableDepth / 2 - params.signDepth / 4);
+    table.add(signObj);
 }
+
+
+var pointLight = new THREE.PointLight(color=0xffffff, intensity=1, distance=params.tableWidth);
+pointLight.position.set( 0, params.poleHeight + params.signHeight / 2,
+        params.tableDepth / 2);
+// scene.add( pointLight );
 
 // create an object for the stand as a whole so it is easier to move
 // origin is at center of table
@@ -786,9 +876,9 @@ scene.add(dirLight.target);
 //``````````````````````NEW CHANGES TO CAMERA FROM NANXI`````````````````````
 var state = TW.cameraSetup(renderer,
                            scene,
-                           {minx: -400, maxx: 400,
-                            miny: -50, maxy: 250,
-                            minz: -400, maxz: 400});
+                           {minx: -200, maxx: 200,
+                            miny: -25, maxy: 200,
+                            minz: -50, maxz: 20});
 
 //use the setInterval method
 //get fixed number of frames for one person
