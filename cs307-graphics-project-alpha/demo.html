@@ -2,7 +2,7 @@
 <!-- 
 Name: Audrea Huang and Nanxi Liu
 Final Project: Version 1
-Date: April 29, 2022
+Date: May 1, 2022
 Creates an image of a nightmarket food stand.
 -->
 <html lang="en">
@@ -36,9 +36,10 @@ Creates an image of a nightmarket food stand.
 <h1>Nightmarket</h1>
 <p> <b>Name</b>: Nanxi Liu and Audrea Huang<br>
     <b>Final Project:</b> Version 1<br>
-    <b>Date</b>: April 29, 2022<br>
-    <b>Description</b>: This program creates a scene of
-    a candy stand at a nightmarket. 
+    <b>Date</b>: May 1, 2022<br>
+    <b>Description</b>: This program creates a scene of a candy stand at
+        a nightmarket. To toggle the music on and off, click the sound
+        icon at the top right corner within the semi-transparent box.
 <br></p>
 
 <script id="prog">
@@ -274,16 +275,16 @@ function createSign() {
     var loader = new THREE.FontLoader();
 
     loader.load(
-        '851tegakizatsu_Regular.json',
+        'font.json',
         function (font) {
             var textGeom = new THREE.TextGeometry('糖葫蘆', 
-                                                    {font: font,
-                                                    size: 11,
-                                                    height: 2,
-                                                    } );
+                                                { font: font,
+                                                size: 11,
+                                                height: 2 } );
             var textMat = new THREE.MeshBasicMaterial({color: 0xf6d0a5});
             var textMesh = new THREE.Mesh(textGeom, textMat);
-            textMesh.position.set(-params.tableWidth/6, -params.signHeight/4, params.signDepth/2);
+            textMesh.position.set(-params.tableWidth/6, 
+                -params.signHeight/4, params.signDepth/2);
             signObj.add(textMesh);
             TW.render();
         } );
@@ -358,16 +359,18 @@ for (var j=0; j<10; j++) {
     table.add(candyL);
     // increase position to the left
     candyL.position.set(
-        j*-5 - params.tableDepth/3, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
+        j*-5 - params.tableDepth/3, 
+        params.tableHeight/2 + params.candyStickHeight/2, 
+        params.tableDepth/2);
 
     // add candies on the right
     var candyR = createCandy();
     table.add(candyR);
     candyR.position.set(
-        j*5 + params.tableDepth/4, params.tableHeight/2 + params.candyStickHeight/2, params.tableDepth/2);
-
+        j*5 + params.tableDepth/4, 
+        params.tableHeight/2 + params.candyStickHeight/2, 
+        params.tableDepth/2);
 }
-
 
 // ===================
 // add peppa pig
@@ -1001,7 +1004,7 @@ function onMouseClick(event) {
             audioLoader.load('music.m4a', function (buffer) {
                 sound.setBuffer( buffer );
                 sound.setLoop( true );
-                sound.setVolume(0.5);
+                sound.setVolume(0.75);
                 sound.play();
             });           
         } else {
@@ -1013,10 +1016,11 @@ function onMouseClick(event) {
 // ===================
 // textures
 // ===================
-TW.loadTextures(["alley1.jpg", "bricks.jpg",
-                 "neon1.jpg", "neon2.jpg", "neon3.jpg", "neon4.jpg",
-                 "neon5.jpeg","neon6.jpg","neon7.jpeg","neon8.jpg",
-                 "neon9.jpg","neon10.jpg","neon11.jpg", "sound.png"], 
+TW.loadTextures(["images/alley1.jpg", "images/bricks.jpg",
+                 "images/neon1.jpg", "images/neon2.jpg", "images/neon3.jpg", 
+                 "images/neon4.jpg", "images/neon5.jpeg", "images/neon6.jpg",
+                 "images/neon7.jpeg", "images/neon8.jpg", "images/neon9.jpg",
+                 "images/neon10.jpg", "images/neon11.jpg", "images/sound.png"], 
                 function (textures) {
                     textureGlobal = textures;
                     displayBackground(textures);
