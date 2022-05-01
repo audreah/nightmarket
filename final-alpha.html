@@ -10,13 +10,13 @@ Creates an image of a nightmarket food stand.
 <meta charset="utf-8">
 <title>Nightmarket</title>
 <style>      
-      canvas {
-          display: block;
-          margin: 10px auto;
-          width: 800px;
-          height: 500px;
-      }
-    </style>
+    canvas {
+        display: block;
+        margin: 10px auto;
+        width: 800px;
+        height: 500px;
+    }
+</style>
 
 <script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r95.all.js">
 "https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"
@@ -140,10 +140,10 @@ poleMesh2.position.set( params.tableWidth/2 - params.poleRadius,
 table.add(poleMesh1);
 table.add(poleMesh2);
 
-function addTextureCoords (signGeom, textures) {
+function addTextureCoords (geom, textures) {
     /* add coordinates to map textures onto */
-    if( ! signGeom instanceof THREE.Geometry ) {
-        throw "not a THREE.Geometry: "+signGeom;
+    if( ! geom instanceof THREE.Geometry ) {
+        throw "not a THREE.Geometry: "+geom;
     }
     // array of face descriptors
     var UVs = [];
@@ -172,7 +172,7 @@ function addTextureCoords (signGeom, textures) {
     faceCoords(1,0, 1,1, 0,1);
 
     // attach this to the geometry
-    signGeom.faceVertexUvs = [ UVs ];
+    geom.faceVertexUvs = [ UVs ];
 }
 
 function createSignLight() {
@@ -236,7 +236,7 @@ function addSignLightsLR(x, y, dy, z, numLights) {
     }
 }
 
-function createSign(textures) {
+function createSign() {
     /* Create the sign for the nightmarket stand, which consists of a box
      * for the backing, text for the name in Chinese of the contents being
      * sold, and lights along the perimeter.
@@ -293,6 +293,7 @@ function createSign(textures) {
     table.add(signObj);
 }
 
+createSign();
 
 var pointLight = new THREE.PointLight(color=0xffffff, intensity=1, distance=params.tableWidth);
 pointLight.position.set( 0, params.poleHeight + params.signHeight / 2,
@@ -702,83 +703,96 @@ marketStand.position.set(0,-40,0);
 scene.add(marketStand);
 
 
-function displayBackground(textures){
-    //textures[3].wrapS = THREE.RepeatWrapping;
-    textures[3].wrapS = THREE.MirroredRepeatWrapping;
-    textures[3].wrapT = THREE.MirroredRepeatWrapping;
-    //textures[3].repeat.set(20,10);
-    textures[3].repeat.set(4,4);
-    textures[3].needsUpdate = true;
+function displayBackground(textures) {
+    textures[0].wrapS = THREE.MirroredRepeatWrapping;
+    textures[0].wrapT = THREE.RepeatWrapping;
+    textures[0].repeat.set(1,1);
+    textures[0].needsUpdate = true;
+
+    //textures[1].wrapS = THREE.RepeatWrapping;
+    textures[1].wrapS = THREE.MirroredRepeatWrapping;
+    textures[1].wrapT = THREE.MirroredRepeatWrapping;
+    //textures[1].repeat.set(20,10);
+    textures[1].repeat.set(4,4);
+    textures[1].needsUpdate = true;
+
     textures[2].wrapS = THREE.MirroredRepeatWrapping;
     textures[2].wrapT = THREE.RepeatWrapping;
     textures[2].repeat.set(1,1);
-    textures[2].needsUpdate = true;
+
+    textures[3].wrapS = THREE.MirroredRepeatWrapping;
+    textures[3].wrapT = THREE.RepeatWrapping;
+    textures[3].repeat.set(1,1);
+
     textures[4].wrapS = THREE.MirroredRepeatWrapping;
     textures[4].wrapT = THREE.RepeatWrapping;
     textures[4].repeat.set(1,1);
+
     textures[5].wrapS = THREE.MirroredRepeatWrapping;
     textures[5].wrapT = THREE.RepeatWrapping;
     textures[5].repeat.set(1,1);
+
     textures[6].wrapS = THREE.MirroredRepeatWrapping;
     textures[6].wrapT = THREE.RepeatWrapping;
     textures[6].repeat.set(1,1);
+
     textures[7].wrapS = THREE.MirroredRepeatWrapping;
     textures[7].wrapT = THREE.RepeatWrapping;
     textures[7].repeat.set(1,1);
+
     textures[8].wrapS = THREE.MirroredRepeatWrapping;
     textures[8].wrapT = THREE.RepeatWrapping;
     textures[8].repeat.set(1,1);
+
     textures[9].wrapS = THREE.MirroredRepeatWrapping;
     textures[9].wrapT = THREE.RepeatWrapping;
     textures[9].repeat.set(1,1);
+
     textures[10].wrapS = THREE.MirroredRepeatWrapping;
     textures[10].wrapT = THREE.RepeatWrapping;
     textures[10].repeat.set(1,1);
+
     textures[11].wrapS = THREE.MirroredRepeatWrapping;
     textures[11].wrapT = THREE.RepeatWrapping;
     textures[11].repeat.set(1,1);
+
     textures[12].wrapS = THREE.MirroredRepeatWrapping;
     textures[12].wrapT = THREE.RepeatWrapping;
     textures[12].repeat.set(1,1);
-    textures[13].wrapS = THREE.MirroredRepeatWrapping;
-    textures[13].wrapT = THREE.RepeatWrapping;
-    textures[13].repeat.set(1,1);
-    textures[14].wrapS = THREE.MirroredRepeatWrapping;
-    textures[14].wrapT = THREE.RepeatWrapping;
-    textures[14].repeat.set(1,1);
+
     var planeGeom = new THREE.PlaneGeometry(600,400);
     //var planeMat = new THREE.MeshBasicMaterial( {color: "black"} );
-    var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[2]} );
+    var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[0]} );
     var planeMesh = new THREE.Mesh(planeGeom, planeMat);
     //adding the neon lights to the background
     //create meshs for the neon lights
     var neon1Geom = new THREE.PlaneGeometry(50,50);
-    var neon1Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[4]});
+    var neon1Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[2]});
     var neon1Mesh = new THREE.Mesh(neon1Geom,neon1Mat);
     neon1Mesh.position.set(50,50,1);
 
     var neon2Geom = new THREE.PlaneGeometry(80,50);
-    var neon2Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[5]});
+    var neon2Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[3]});
     var neon2Mesh = new THREE.Mesh(neon2Geom,neon2Mat);
     neon2Mesh.position.set(75,0,1);
 
     var neon3Geom = new THREE.PlaneGeometry(40,50);
-    var neon3Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[6]});
+    var neon3Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[4]});
     var neon3Mesh = new THREE.Mesh(neon3Geom,neon3Mat);
     neon3Mesh.position.set(-90,60,1);
 
     var neon4Geom = new THREE.PlaneGeometry(60,30);
-    var neon4Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[7]});
+    var neon4Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[5]});
     var neon4Mesh = new THREE.Mesh(neon4Geom,neon4Mat);
     neon4Mesh.position.set(-120,30,1.5);
 
     var neon5Geom = new THREE.PlaneGeometry(50,50);
-    var neon5Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[8]});
+    var neon5Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[6]});
     var neon5Mesh = new THREE.Mesh(neon5Geom,neon5Mat);
     neon5Mesh.position.set(130,50,1);
 
     var neon6Geom = new THREE.PlaneGeometry(70,25);
-    var neon6Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[9]});
+    var neon6Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[7]});
     var neon6Mesh = new THREE.Mesh(neon6Geom,neon6Mat);
     neon6Mesh.position.set(-150,-10,1);
 
@@ -799,7 +813,7 @@ function displayBackground(textures){
     //CLONE TWO SIDE PLANES
     var groundGeom = new THREE.PlaneGeometry(1000,400);
     var groundMat = new THREE.MeshBasicMaterial({color: 0xffffff,
-                                                 map: textures[3]});
+                                                 map: textures[1]});
     var groundMesh = new THREE.Mesh(groundGeom,groundMat);
     groundMesh.rotation.x = -Math.PI/2;
     groundMesh.position.y = -50;
@@ -810,7 +824,7 @@ function displayBackground(textures){
 
 var nframes = 0;
 //ADJUSTS THE ARM AND LEG ROTATION OF PEPPA
-function dance(){}
+function dance() {}
 
 function runTimer (peppa) {
     // remove current hand, and create and render a new hand at a
@@ -847,17 +861,166 @@ firstState();*/
 //write a function called dance that moves peppa's limbs
 
 //add keyboard controls
-TW.render();
+
+
+// ===================
+// sound
+// ===================
+function createSoundBox(textures) {
+    /* Creates a box to toggle the music and adds it to the scene. 
+     * This box object consists of a sound icon encased in a 
+     * multi-colored semi-transparent box, inspired by the 
+     * mystery cube from Mario Kart.
+     * @param textures - contains the image for the sound icon */
+
+    var soundbox = new THREE.Object3D();
+
+    var soundGeom = new THREE.BoxGeometry(20,20,20);
+    addTextureCoords(soundGeom, textures);
+
+    var materials = [
+        new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, map: textures[13] }), // sound icon
+        new THREE.MeshPhongMaterial({ 
+            color: 0xFFDDFA, transparent: true, opacity: 0.5 }), // pink
+        new THREE.MeshPhongMaterial({ 
+            color: 0xFEFFDD, transparent: true, opacity: 0.5 }), // yellow
+        new THREE.MeshPhongMaterial({ 
+            color: 0xD2F3FD, transparent: true, opacity: 0.5 }), // blue
+        new THREE.MeshPhongMaterial({ 
+            color: 0xD79EFD, transparent: true, opacity: 0.5 }), // purple
+        new THREE.MeshPhongMaterial({ 
+            color: 0x00ffff, transparent: true, opacity: 0.5 }), // green
+        new THREE.MeshPhongMaterial({ 
+            color: 0xFED09C, transparent: true, opacity: 0.5 }) // orange
+    ]; 
+
+    // put the sound icon on the front of the inner box        
+    soundGeom.faces[8].materialIndex = 0;
+    soundGeom.faces[9].materialIndex = 0;
+    var soundboxMesh = new THREE.Mesh(soundGeom, materials);
+    soundbox.add(soundboxMesh);
+
+    // create a transparent box around the sound icon
+    var soundboxTransparentGeom = new THREE.BoxGeometry(25,25,25);
+    addTextureCoords(soundboxTransparentGeom, textures);
+    // right
+    soundboxTransparentGeom.faces[0].materialIndex = 1;
+    soundboxTransparentGeom.faces[1].materialIndex = 1;
+    
+    // left
+    soundboxTransparentGeom.faces[2].materialIndex = 2;
+    soundboxTransparentGeom.faces[3].materialIndex = 2;
+
+    // top
+    soundboxTransparentGeom.faces[4].materialIndex = 3;
+    soundboxTransparentGeom.faces[5].materialIndex = 3;
+
+    // bottom
+    soundboxTransparentGeom.faces[6].materialIndex = 4;
+    soundboxTransparentGeom.faces[7].materialIndex = 4;
+
+    // front
+    soundboxTransparentGeom.faces[8].materialIndex = 5;
+    soundboxTransparentGeom.faces[9].materialIndex = 5;
+
+    // back
+    soundboxTransparentGeom.faces[10].materialIndex = 6;
+    soundboxTransparentGeom.faces[11].materialIndex = 6;
+
+    var soundboxTransparent = new THREE.Mesh(soundboxTransparentGeom, materials);
+    
+    // name the transparent encasing of the soundbox (which is larger) 
+    // so it is identifiable with the raycaster
+    soundboxTransparent.name = "soundbox";
+    soundbox.add(soundboxTransparent);
+
+    soundbox.position.set(200,150,10);
+    scene.add(soundbox);
+}
+
+// ===================
+// camera
+// ===================
+
+var state = TW.cameraSetup(renderer,
+                           scene,
+                           {minx: -200, maxx: 200,
+                            miny: -200, maxy: 200,
+                            minz: -100, maxz: 50});
+
+var camera = state.cameraObject;  // allows for usage with raycaster
+camera.position.set(0, 0, 300);
+camera.lookAt(new THREE.Vector3(0, 0, 0));
+scene.add(camera);
+
+var listener = new THREE.AudioListener();
+camera.add(listener);
+
+var sound = new THREE.Audio(listener);
+var audioLoader = new THREE.AudioLoader();
+
+// ===================
+// mouse interaction
+// ===================
+var c1 = renderer.domElement;
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+
+document.addEventListener("click", onMouseClick);
+
+function onMouseClick(event) {
+    /* callback function to start and stop the music when the user
+     * clicks on the soundbox in the upper right corner */
+    var mx = event.clientX;
+    var my = event.clientY;
+    var target = event.target;
+    if (target == c1) {
+        // use canvas offset to determine mouse coordinates in canvas
+        var rect = target.getBoundingClientRect();
+        var cx = mx-rect.left;
+        var cy = my-rect.top;
+    } else {
+        return;
+    }
+    
+    // get mouse coordinates in the range from -1 to +1 (canvas is 800 x 500 pixels)
+    mouse.x = (cx / 800) * 2 - 1;
+    mouse.y = -(cy / 500) * 2 + 1;
+
+    // setup raycaster using mouse position and camera
+    raycaster.setFromCamera(mouse, camera);
+
+    // get array of objects projecting to this mouse position, recursively
+    // checking all descendants of each object in the scene
+    var intersects = raycaster.intersectObjects(scene.children, true);
+
+    // start playing music if object closest to the camera has the name of soundbox
+    if (intersects.length > 0 && intersects[0].object.name == "soundbox") {
+        if (!sound.isPlaying) {
+            audioLoader.load('music.m4a', function (buffer) {
+                sound.setBuffer( buffer );
+                sound.setLoop( true );
+                sound.setVolume(0.5);
+                sound.play();
+            });           
+        } else {
+            sound.pause();
+        }
+    }
+}
 
 // ===================
 // textures
 // ===================
-TW.loadTextures(["sign.png", "bg.png","alley1.jpg","bricks.jpg","neon1.jpg","neon2.jpg","neon3.jpg","neon4.jpg","neon5.jpeg","neon6.jpg",
-"neon7.jpeg","neon8.jpg","neon9.jpg","neon10.jpg","neon11.jpg"], 
+TW.loadTextures(["alley1.jpg", "bricks.jpg",
+                 "neon1.jpg", "neon2.jpg", "neon3.jpg", "neon4.jpg",
+                 "neon5.jpeg","neon6.jpg","neon7.jpeg","neon8.jpg",
+                 "neon9.jpg","neon10.jpg","neon11.jpg", "sound.png"], 
                 function (textures) {
                     textureGlobal = textures;
-                    createSign(textures);
                     displayBackground(textures);
+                    createSoundBox(textures);
                     TW.render();
                 } );
 
@@ -873,12 +1036,6 @@ dirLight.position.set(0, params.poleHeight,
 dirLight.target.position.set(0, 0, -params.tableDepth/16);
 scene.add(dirLight);
 scene.add(dirLight.target);
-//``````````````````````NEW CHANGES TO CAMERA FROM NANXI`````````````````````
-var state = TW.cameraSetup(renderer,
-                           scene,
-                           {minx: -200, maxx: 200,
-                            miny: -25, maxy: 200,
-                            minz: -50, maxz: 20});
 
 //use the setInterval method
 //get fixed number of frames for one person
