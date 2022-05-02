@@ -41,7 +41,9 @@ Creates an image of a nightmarket food stand.
         a nightmarket. To toggle the music on and off, click the sound
         icon at the top right corner within the semi-transparent box. 
         To make the figures dance, click on their dresses. 
-        The figures can only dance one at a time
+        The figures can only dance one at a time. Here are our references: <a href="https://cs.wellesley.edu/~cs307/lectures-s21/Interaction-exercises/midas.html">Midas Touch</a>, 
+        <a href="https://cs.wellesley.edu/~cs307/lectures-s21/Interaction-1-S22.html">Apr 12 handout</a>, <a href ="https://cs.wellesley.edu/~cs307/lectures-s21/animation-1-S22.html">Animation1 Handout</a>, 
+        <a href="https://cs.wellesley.edu/~cs307/lectures-s21/animation-2-S22.html">Animation2 Handout</a>
 <br></p>
 
 <script id="prog">
@@ -321,7 +323,7 @@ function createSign() {
             textMesh.position.set(-params.tableWidth/6, 
                 -params.signHeight/4, params.signDepth/2);
             signObj.add(textMesh);
-            TW.render();
+            render();
         } );
 
     signObj.position.set(0, params.poleHeight + params.signHeight / 2,
@@ -789,53 +791,38 @@ function displayBackground(textures){
     textures[7].wrapS = THREE.MirroredRepeatWrapping;
     textures[7].wrapT = THREE.RepeatWrapping;
     textures[7].repeat.set(1,1);
-    textures[8].wrapS = THREE.MirroredRepeatWrapping;
-    textures[8].wrapT = THREE.RepeatWrapping;
-    textures[8].repeat.set(1,1);
-    textures[9].wrapS = THREE.MirroredRepeatWrapping;
-    textures[9].wrapT = THREE.RepeatWrapping;
-    textures[9].repeat.set(1,1);
-    textures[10].wrapS = THREE.MirroredRepeatWrapping;
-    textures[10].wrapT = THREE.RepeatWrapping;
-    textures[10].repeat.set(1,1);
-    textures[11].wrapS = THREE.MirroredRepeatWrapping;
-    textures[11].wrapT = THREE.RepeatWrapping;
-    textures[11].repeat.set(1,1);
-    textures[12].wrapS = THREE.MirroredRepeatWrapping;
-    textures[12].wrapT = THREE.RepeatWrapping;
-    textures[12].repeat.set(1,1);
     var planeGeom = new THREE.PlaneGeometry(600,400);;
-    var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[2]} );
+    var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[0]} );
     var planeMesh = new THREE.Mesh(planeGeom, planeMat);
     //adding the neon lights to the background
     //create meshs for the neon lights
     var neon1Geom = new THREE.PlaneGeometry(50,50);
-    var neon1Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[4]});
+    var neon1Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[2]});
     var neon1Mesh = new THREE.Mesh(neon1Geom,neon1Mat);
     neon1Mesh.position.set(50,50,1);
 
     var neon2Geom = new THREE.PlaneGeometry(80,50);
-    var neon2Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[5]});
+    var neon2Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[3]});
     var neon2Mesh = new THREE.Mesh(neon2Geom,neon2Mat);
     neon2Mesh.position.set(75,0,1);
 
     var neon3Geom = new THREE.PlaneGeometry(40,50);
-    var neon3Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[6]});
+    var neon3Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[4]});
     var neon3Mesh = new THREE.Mesh(neon3Geom,neon3Mat);
     neon3Mesh.position.set(-90,60,1);
 
     var neon4Geom = new THREE.PlaneGeometry(60,30);
-    var neon4Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[7]});
+    var neon4Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[5]});
     var neon4Mesh = new THREE.Mesh(neon4Geom,neon4Mat);
     neon4Mesh.position.set(-120,30,1.5);
 
     var neon5Geom = new THREE.PlaneGeometry(50,50);
-    var neon5Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[8]});
+    var neon5Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[6]});
     var neon5Mesh = new THREE.Mesh(neon5Geom,neon5Mat);
     neon5Mesh.position.set(130,50,1);
 
     var neon6Geom = new THREE.PlaneGeometry(70,25);
-    var neon6Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[9]});
+    var neon6Mat = new THREE.MeshBasicMaterial({color:0xffffff,map:textures[7]});
     var neon6Mesh = new THREE.Mesh(neon6Geom,neon6Mat);
     neon6Mesh.position.set(-150,-10,1);
 
@@ -843,7 +830,7 @@ function displayBackground(textures){
     planeMesh.position.set(0,150,-80);
     var groundGeom = new THREE.PlaneGeometry(1000,400);
     var groundMat = new THREE.MeshBasicMaterial({color: 0xffffff,
-                                                 map: textures[3]});
+                                                 map: textures[1]});
     var groundMesh = new THREE.Mesh(groundGeom,groundMat);
     groundMesh.rotation.x = -Math.PI/2;
     groundMesh.position.y = -50;
@@ -976,11 +963,11 @@ var cameraParams = {
     fov: 90,                  // degrees
     aspectRatio: 800.0/500.0, // from canvas dimensions, see CSS
     atX: 0,
-    atY: 50,
-    atZ: 0,
+    atY: 20,
+    atZ: 30,
     eyeX: 0,
-    eyeY: 50,
-    eyeZ: 200,
+    eyeY: 20,
+    eyeZ: 230,
     upX: 0,
     upY: 1,
     upZ: 0
