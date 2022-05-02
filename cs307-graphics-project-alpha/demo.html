@@ -694,12 +694,20 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
      * @param dressColor - color of dress
      * @param shoeMaterial - color of the shoe 
      * @return {THREE.Object3D} peppa object */
-    var bodyMaterial = new THREE.MeshBasicMaterial({color: bodyColor});
-    var dressMaterial = new THREE.MeshBasicMaterial({color: dressColor});
-    var shoeMaterial = new THREE.MeshBasicMaterial({color: shoeColor});
+    var bodyMaterial = new THREE.MeshPhongMaterial({color: bodyColor,
+                                                    specular: bodyColor,
+                                                    shininess: 1});
+    var dressMaterial = new THREE.MeshPhongMaterial({color: dressColor,
+                                                    specular: THREE.ColorKeywords.white,
+                                                    shininess:1});
+    var shoeMaterial = new THREE.MeshPhongMaterial({color: shoeColor,
+                                                    specular: THREE.ColorKeywords.white,
+                                                    shininess:20});
     var eyeMaterial = new THREE.MeshBasicMaterial({color: "white"});
     var mouthMaterial = new THREE.MeshBasicMaterial({color: 0xf54296});
-    var dimpleMaterial = new THREE.MeshBasicMaterial({color:0xf28fce});
+    var dimpleMaterial = new THREE.MeshPhongMaterial({color:0xf28fce,
+                                                    specular: 0xf28fce,
+                                                    shininess:1});
     var pupilMaterial = new THREE.MeshBasicMaterial({color: "black"});
 
     var pig = new THREE.Object3D();
