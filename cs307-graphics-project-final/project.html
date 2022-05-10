@@ -32,19 +32,20 @@ Creates an image of a nightmarket food stand.
 </script>
 
 </head>
-<body>
-<h1>Nightmarket</h1>
-<p> <b>Name</b>: Nanxi Liu and Audrea Huang<br>
-    <b>Final Project:</b> Version 1<br>
-    <b>Date</b>: May 1, 2022<br>
-    <b>Description</b>: This program creates a scene of a candy stand at
-        a nightmarket. To toggle the music on and off, click the sound
-        icon at the top right corner within the semi-transparent box. 
-        To make the figures dance, click on their dresses. 
-        The figures can only dance one at a time. Here are our references: <a href="https://cs.wellesley.edu/~cs307/lectures-s21/Interaction-exercises/midas.html">Midas Touch</a>, 
-        <a href="https://cs.wellesley.edu/~cs307/lectures-s21/Interaction-1-S22.html">Apr 12 handout</a>, <a href ="https://cs.wellesley.edu/~cs307/lectures-s21/animation-1-S22.html">Animation1 Handout</a>, 
-        <a href="https://cs.wellesley.edu/~cs307/lectures-s21/animation-2-S22.html">Animation2 Handout</a>
-<br></p>
+<body style="background-color:#181b1c">
+<h1 style="color:white; text-align: center;">Nightmarket</h1>
+<div style="word-wrap:break-word; max-width:50%; text-align: center;">
+    <p style="color:white; margin: 0 auto 0 0;">
+        <b>Name</b>: Nanxi Liu and Audrea Huang<br>
+        <b>CS 307 Final Project</b><br>
+        <b>Date</b>: May 16, 2022<br>
+        <b>Description</b>: Welcome to our night market candy stand!
+            To toggle the music on and off, click the sound
+            icon at the top right corner within the semi-transparent box. 
+            To make the figures dance, click on their dresses. 
+            The figures can only dance one at a time.
+    <br></p>
+</div>
 
 <script id="prog">
 //the two dance arrays determine peppa's dance moves
@@ -874,7 +875,8 @@ function displayBackground(textures){
     textures[12].wrapT = THREE.RepeatWrapping;
     textures[12].repeat.set(1,1);
 
-    var planeGeom = new THREE.PlaneGeometry(600,400);;
+    // plane of alley in background
+    var planeGeom = new THREE.PlaneGeometry(600,400);
     var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[0]} );
     var planeMesh = new THREE.Mesh(planeGeom, planeMat);
     // adding the neon lights to the background
@@ -1146,7 +1148,8 @@ TW.loadTextures(["images/alley1.jpg", "images/bricks.jpg",
                  "images/neon1.jpg", "images/neon2.jpg", "images/neon3.jpg", 
                  "images/neon4.jpg", "images/neon5.jpeg", "images/neon6.jpg",
                  "images/neon7.jpeg", "images/neon8.jpg", "images/neon9.jpg",
-                 "images/neon10.jpg", "images/neon11.jpg", "images/sound.png"], 
+                 "images/neon10.jpg", "images/neon11.jpg", "images/sound.png",
+                 "images/market-left.png"], 
                 function (textures) {
                     textureGlobal = textures;
                     displayBackground(textures);
