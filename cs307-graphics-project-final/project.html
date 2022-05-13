@@ -137,7 +137,16 @@ var params = {
     peppa0Z: -45,
     peppa0Color: 0xf5574c,
     peppa0Rotation:0,
-    peppaDressColor:0
+    peppaDressColor:0,
+    //parameters for the spinning peppa
+    ry:0.05,
+    timeRight:0,
+    timeLeft:0,
+    //perameters for the bouncing peppa
+    peppaBouncePeriod: 3,  // time to bounce once, in arbitrary time units
+    maxPeppaHeight: 40,     // max y position of the center of the ball
+    deltaT: 0.035,
+    peppaBodyHeight:50
 }
 
 //peppa is the global variable name for the object that's been clicked on
