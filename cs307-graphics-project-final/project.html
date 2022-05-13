@@ -125,7 +125,7 @@ var params = {
     peppa1Rotation:Math.PI/4,
     /*@params parameters for peppa on the right*/
     peppa2X: 150,
-    peppa2Y: 30,
+    peppa2Y: -10,
     peppa2Z: 70,
     peppa2Color: 0xed9f2b,
     peppa2Rotation:-Math.PI/4,
@@ -777,15 +777,8 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
         body = dress1;
         console.log("dress1 color detected");
     }
-    else if (dressColor == 0x109de8){
-        dress2 = createBody(params,dressMaterial);
-        body = dress2;
-        console.log("dress2 color detected");
-    }
-    else if (dressColor == 0xed9f2b){
-        dress3 = createBody(params,dressMaterial);
-        body = dress3;
-        console.log("dress3 color detected");
+    else{
+        body = createBody(params,dressMaterial);
     }
     addArm(body,1,params,bodyMaterial);
     addArm(body,-1,params,bodyMaterial);
@@ -808,17 +801,13 @@ var peppaPig1 = makePeppa(params,1,0xf2a5c9,0x109de8,"black");
 peppaPig1.rotation.y = params.peppa1Rotation;
 peppaPig1.position.set(params.peppa1X, params.peppa1Y, params.peppa1Z);
 
-//peppa on the right
-var peppaPig2 = makePeppa(params,1,0xf2a5c9,0xed9f2b,"black");
-peppaPig2.position.set(params.peppa2X, params.peppa2Y, params.peppa2Z);
-peppaPig2.rotation.y = params.peppa2Rotation;
-
 //add the figures to the market stand
 marketStand.add(peppaPig,peppaPig1,peppaPig2);
 
 marketStand.position.set(0,-40,0);
 scene.add(marketStand);
 
+    
 
 function displayBackground(textures){
     textures[0].wrapS = THREE.MirroredRepeatWrapping;
@@ -922,6 +911,122 @@ function displayBackground(textures){
     groundMesh.position.y = -50;
     scene.add(planeMesh,groundMesh);
 }
+//===============================================
+//ANIMATION FOR THE FIGURES ON THE LEFT AND RIGHT
+//===============================================
+var peppaPig2;
+//this sets peppa2 back to its original rotation and position
+function firstState2(){
+    if ( peppaPig2 != null ) {
+        scene.remove(peppaPig2);
+        console.log("peppa2 removed");
+        render();
+    }
+    params.timeRight = 0;
+    peppaPig2 = makePeppa(params,1,0xf2a5c9,0xed9f2b,"black");
+    peppaPig2.position.set(params.peppa2X, params.peppa2Y, params.peppa2Z);
+    peppaPig2.rotation.y = -Math.PI/4;
+    scene.add(peppaPig2);
+    render();
+}
+firstState2();
+//animation for peppa on the right
+function updateState2() {
+    params.timeRight += 1;
+    // increase the total rotations by the velocity
+    //params.peppa2Rotation += params.ry;
+    peppaPig2.rotateY(params.ry);
+}
+
+// oneStep() performs one step of the animation
+function oneStep2() {
+    updateState2();
+    render();
+}
+    
+// stored so that we can cancel the animation if we want
+var animationId2 = null;                
+
+// animate() starts the continuous animation loop
+function animate2(timestamp) {
+    oneStep2();
+    animationId2 = requestAnimationFrame(animate2);
+}
+
+// stopAnimation() halts the animation
+function stopAnimation2() {
+    if( animationId2 != null ) {
+        cancelAnimationFrame(animationId2);
+        console.log("Cancelled animation using " + animationId2);
+    }
+}
+
+// keyboard controls for the animation control
+TW.setKeyboardCallback("0", firstState2, "reset animation");
+TW.setKeyboardCallback("2", oneStep2, "advance by one step");
+TW.setKeyboardCallback("g", animate2, "go:  start animation");
+TW.setKeyboardCallback("s", stopAnimation2, "stop animation");
+
+function firstState(){
+    params.timeLeft = 0;
+    peppaPig1.position.y = 30;
+    render();
+}
+
+//animation for the peppa on the left
+function linearMap (x, minx, maxx, miny, maxy) {
+    // t is in the range [0,1]
+    t = (x-minx)/(maxx-minx);
+    y = t*(maxy-miny)+miny;
+    return y;
+};
+
+// sets the position of the ball based on current time
+
+function setPeppaPosition (time) {
+    // rescale the time dimension so that the period of bouncing maps to pi
+    var angle = time * Math.PI / params.peppaBouncePeriod; 
+    var abs_cos = Math.abs(Math.cos(angle));
+    var peppaHeight = linearMap(abs_cos, 0, 1, 
+                               params.peppaBodyHeight, params.maxPeppaHeight);
+    peppaPig1.position.y = peppaHeight;
+    return peppaHeight;
+}
+
+//animation for peppa on the left
+function updateState1() {
+    params.timeLeft += params.deltaT;
+    params.peppa1Y = setPeppaPosition(params.timeLeft);
+}
+
+// oneStep() performs one step of the animation
+function oneStep1() {
+    updateState1();
+    render();
+}
+    
+// stored so that we can cancel the animation if we want
+var animationId1 = null;                
+
+// animate() starts the continuous animation loop
+function animate1(timestamp) {
+    oneStep1();
+    animationId1 = requestAnimationFrame(animate1);
+}
+
+// stopAnimation() halts the animation
+function stopAnimation1() {
+    if( animationId1 != null ) {
+        cancelAnimationFrame(animationId1);
+        console.log("Cancelled animation using " + animationId1);
+    }
+}
+
+// keyboard controls for the animation control
+
+TW.setKeyboardCallback("1", firstState, "reset animation");
+TW.setKeyboardCallback("j", animate1, "go:  start animation");
+TW.setKeyboardCallback(" ", stopAnimation1, "stop animation");
 
 var nframes = 0;
 //runTimer makes peppa dance for 12 frames
@@ -947,20 +1052,6 @@ function runTimer () {
             peppaPig.position.set(params.peppa0X, params.peppa0Y, params.peppa0Z);
             marketStand.add(peppaPig);
             console.log("peppa0 RESTORED");
-        }
-        else if(params.peppaDressColor == params.peppa1Color){
-            peppaPig1 = makePeppa(params,1,0xf2a5c9,0x109de8,"black");
-            peppaPig1.rotation.y = params.peppa1Rotation;
-            peppaPig1.position.set(params.peppa1X, params.peppa1Y, params.peppa1Z);
-            marketStand.add(peppaPig1);
-            console.log("peppa1 RESTORED");
-        }
-        else if(params.peppaDressColor == params.peppa2Color){
-            peppaPig2 = makePeppa(params,1,0xf2a5c9,0xed9f2b,"black");
-            peppaPig2.position.set(params.peppa2X, params.peppa2Y, params.peppa2Z);
-            peppaPig2.rotation.y = params.peppa2Rotation;
-            marketStand.add(peppaPig2);
-            console.log("peppa2 RESTORED");
         }
         render();
     } else {
@@ -1102,28 +1193,7 @@ function onClick (event) {
             console.log("clicked on peppaPigMiddle");
             marketStand.remove(peppaPig);
             clock = setInterval(runTimer,500);
-        } else if (clickedObject == dress2) {
-            clickedObject = peppaPig1;
-            params.peppaPosX = params.peppa1X;
-            params.peppaPosY = -10;
-            params.peppaPosZ = params.peppa1Z;
-            params.peppaDressColor = params.peppa1Color;
-            params.peppaRotation = params.peppa1Rotation;
-            console.log("clicked on peppaPigLeft");
-            marketStand.remove(peppaPig1);
-            clock = setInterval(runTimer,500);
-        } else if (clickedObject == dress3) {
-            clickedObject = peppaPig2;
-            params.peppaPosX = params.peppa2X;
-            params.peppaPosY = -10;
-            params.peppaPosZ = params.peppa2Z;
-            params.peppaDressColor = params.peppa2Color;
-            params.peppaRotation = params.peppa2Rotation;
-            console.log("clicked on peppaPigRight");
-            marketStand.remove(peppaPig2);
-            clock = setInterval(runTimer,500);
-        }
-
+        } 
         if (clickedObject.name == "soundbox") {
             if (!sound.isPlaying) { 
                 audioLoader.load( 'music.m4a', function( buffer ) {
