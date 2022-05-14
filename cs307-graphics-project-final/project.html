@@ -34,18 +34,22 @@ Creates an image of a nightmarket food stand.
 </head>
 <body style="background-color:#181b1c">
 <h1 style="color:white; text-align: center;">Nightmarket</h1>
-<div style="word-wrap:break-word; max-width:80%; text-align: center;margin-left: auto; margin-right:auto;">
+<div style="word-wrap:break-word; max-width:80%; 
+    text-align: center;margin-left: auto; margin-right:auto;">
     <p style="color:white; margin: 0 auto 0 0;text-align: center;">
         <b>Name</b>: Nanxi Liu and Audrea Huang<br>
         <b>CS 307 Final Project</b><br>
         <b>Date</b>: May 16, 2022<br>
-        <b>Description</b>: Welcome to our night market candy stand!
+        <b>Description</b>: Welcome to our night market candy stand!<br><br>
             To toggle the music on and off, click the sound
-            icon at the top right corner within the semi-transparent box. 
-            Press "g" to make the figure on the right spin and press s to make it stop. 
-            Press "2" to make it spin step by step and press "0" to set it back to its original state.
-            Press "j" to make the figure on the left bounce and press space to make it stop.
-            Press "1" to set it back to its original state.
+            icon at the top right corner within the semi-transparent box.<br><br>
+            Press "g" to make the figure on the right spin and 
+            press "s" to make it stop.<br> 
+            Press "2" to make it spin step by step and 
+            press "0" to set it back to its original state.<br><br>
+            Press "j" to make the figure on the left bounce and 
+            press space to make it stop.<br>
+            Press "1" to set it back to its original state.<br>
     <br></p>
 </div>
 
@@ -61,15 +65,16 @@ var params = {
     tableDepth: 45,
     signHeight: 20,
     signDepth: 10,
+    signLightRadius: 1,
     candyStickHeight: 8,
-    //params for arms
+    // params for arms
     armRadius:0.5,
     armLength:12,
     armRotation:Math.PI/1.5,
     fingerLength:4,
     fingerRotation: Math.PI/6,
     fingerPosY: -3,
-    //params for legs
+    // params for legs
     legRadius: 0.5,
     legHeight: 5,
     legRotation:0,
@@ -94,7 +99,7 @@ var params = {
     eyeAngleYL: -Math.PI/10,
     eyeAngleXR: -Math.PI/6,
     eyeAngleYR: Math.PI/20,//Math.PI/10,
-    eyeRotation:Math.PI*0.7,
+    eyeRotation: Math.PI*0.7,
     earRadius: 2,
     earScaleY: 2,
     earScaleZ:0.5,
@@ -106,51 +111,63 @@ var params = {
     mouthRadialSegment: 10,
     mouthTubularSegment: 200,
     mouthArc: 2.4,
-    armLength:10,
-    fingerLength:3,
-    legLength:8,
-    footRadius:2,
-    footStretchZ:1.5,
-    //parameters FOR ANIMATION
+    armLength: 10,
+    fingerLength: 3,
+    legLength: 8,
+    footRadius: 2,
+    footStretchZ: 1.5,
+    // parameters FOR ANIMATION
     direction:1,
-    rotationZ:0,
-    dz:Math.PI/2,
+    rotationZ: 0,
+    dz: Math.PI/2,
     peppaPosX: 40,
-    peppaPosY:-10,
-    peppaPosZ:50,
-    peppaRotation:0,
-    /*@params parameters for peppa on the left*/
+    peppaPosY: -10,
+    peppaPosZ: 50,
+    peppaRotation: 0,
+    // parameters for peppa on the left
     peppa1X: -150,
     peppa1Y: 30,
     peppa1Z: 45,
     peppa1Color: 0x109de8,
-    peppa1Rotation:Math.PI/4,
-    /*@params parameters for peppa on the right*/
+    peppa1Rotation: Math.PI/4,
+    // parameters for peppa on the right
     peppa2X: 150,
     peppa2Y: -10,
     peppa2Z: 70,
     peppa2Color: 0xed9f2b,
-    peppa2Rotation:-Math.PI/4,
-    /*@params parameters for peppa in the middle*/
+    peppa2Rotation: -Math.PI/4,
+    // parameters for peppa in the middle
     peppa0X:0,
     peppa0Y: 30,
     peppa0Z: -45,
     peppa0Color: 0xf5574c,
-    peppa0Rotation:0,
-    peppaDressColor:0,
-    //parameters for the spinning peppa
-    ry:0.05,
-    timeRight:0,
-    timeLeft:0,
-    //perameters for the bouncing peppa
+    peppa0Rotation: 0,
+    peppaDressColor: 0,
+    // parameters for the spinning peppa
+    ry: 0.05,
+    timeRight: 0,
+    timeLeft: 0,
+    // parameters for the bouncing peppa
     peppaBouncePeriod: 3,  // time to bounce once, in arbitrary time units
     maxPeppaHeight: 40,     // max y position of the center of the ball
     deltaT: 0.035,
-    peppaBodyHeight:50
+    peppaBodyHeight: 50,
+    // soundbox
+    soundboxLength: 25,
 }
 
-//peppa is the global variable name for the object that's been clicked on
-//the 3 dress variables are the global variable names for the figures' dresses, which the users can click on to make the figures dance.
+/* storing the dimensions of the canvas allows us to create
+ * the camera params and dimensions of the room for the
+ * nightmarket scene in relation */
+var canvasParams = {
+    width: 800.0,
+    height: 500.0,
+    roomHeight: 600
+}
+
+// peppa is the global variable name for the object that's been clicked on.
+// the 3 dress variables are the global variable names for the figures' 
+// dresses, which the users can click on to make the figures dance.
 var peppa, clock;
 var dress1,dress2,dress3;
 
@@ -165,14 +182,20 @@ TW.mainInit(renderer,scene);
 // CAMERA
 // ================
 
+TW.cameraSetup(renderer,
+               scene,
+               {minx: -400, maxx: 400,
+                miny: -100, maxy: 300,
+                minz: -200, maxz: 300});
+
 var cameraParams = {
     near: 5,
     far: 500,
-    fov: 90,                  // degrees
-    aspectRatio: 800.0/500.0, // from canvas dimensions, see CSS
+    fov: 90,     // degrees
+    aspectRatio: canvasParams.width / canvasParams.height,
     atX: 0,
     atY: 20,
-    atZ: 30,
+    atZ: -200,
     eyeX: 0,
     eyeY: 20,
     eyeZ: 230,
@@ -238,8 +261,16 @@ table.add(poleMesh1);
 table.add(poleMesh2);
 
 function addTextureCoords (geom, textures) {
-    /* add coordinates to map textures onto */
-    if( ! geom instanceof THREE.Geometry ) {
+    /* Add coordinates to map textures onto for box geometries,
+     * adhering to the following mapping:
+     * right  -> faces 0-1
+     * left   -> faces 2-3
+     * top    -> faces 4-5
+     * bottom -> faces 6-7
+     * front  -> faces 8-9
+     * back   -> faces 10-11 */
+
+    if( ! geom instanceof THREE.BoxGeometry ) {
         throw "not a THREE.Geometry: "+geom;
     }
     // array of face descriptors
@@ -249,24 +280,11 @@ function addTextureCoords (geom, textures) {
                     new THREE.Vector2(bs,bt),
                     new THREE.Vector2(cs,ct) ] );
     }
-    // right (face 0-1)
-    faceCoords(1,0, 0,0, 1,1);
-    faceCoords(1,1, 0,0, 0,1);
-    // left (faces 2-3)
-    faceCoords(1,0, 0,1, 0,0);
-    faceCoords(1,0, 1,1, 0,1);
-    // top (faces 4-5)
-    faceCoords(1,1, 1,0, 0,1);
-    faceCoords(0,1, 1,1, 1,0);
-    // bottom (faces 6-7)
-    faceCoords(1,1, 1,1, 0,0);
-    faceCoords(1,1, 0,1, 0,0);
-    // front (faces 8-9)
-    faceCoords(0,1, 0,0, 1,1);
-    faceCoords(0,0, 1,0, 1,1);
-    // back (faces 10-11)
-    faceCoords(0,0, 1,0, 0,1);
-    faceCoords(1,0, 1,1, 0,1);
+
+    for (var i=0; i<6; i++) {
+        faceCoords(0,1, 0,0, 1,1);
+        faceCoords(0,0, 1,0, 1,1);
+    }
 
     // attach this to the geometry
     geom.faceVertexUvs = [ UVs ];
@@ -391,11 +409,6 @@ function createSign() {
 }
 
 createSign();
-
-var pointLight = new THREE.PointLight(color=0xffffff, intensity=1, distance=params.tableWidth);
-pointLight.position.set( 0, params.poleHeight + params.signHeight / 2,
-        params.tableDepth / 2);
-// scene.add( pointLight );
 
 // create an object for the stand as a whole so it is easier to move
 // origin is at center of table
@@ -801,8 +814,6 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
     return pig;
 }
 
-
-
 // peppa at the center
 var peppaPig = makePeppa(params,1,0xf2a5c9,0xf5574c,"black");
 peppaPig.position.set(params.peppa0X, params.peppa0Y, params.peppa0Z);
@@ -815,70 +826,78 @@ peppaPig1.position.set(params.peppa1X, params.peppa1Y, params.peppa1Z);
 //add the figures to the market stand
 marketStand.add(peppaPig,peppaPig1,peppaPig2);
 
-marketStand.position.set(0,-40,0);
+marketStand.position.set(0,-40,-50);
 scene.add(marketStand);
 
-    
 
 function displayBackground(textures){
-    textures[0].wrapS = THREE.MirroredRepeatWrapping;
-    textures[0].wrapT = THREE.RepeatWrapping;
-    textures[0].repeat.set(1,1);
-    textures[0].needsUpdate = true;
+    // background box to set the scene
+    var roomGeom = new THREE.BoxGeometry(
+                    canvasParams.width, canvasParams.roomHeight, 500);
+    addTextureCoords(roomGeom, textures);
+    
 
+    var backgroundMaterials = [
+        // new THREE.MeshPhongMaterial({ 
+        //     color: 0xffffff, map: textures[0],
+        //     side: THREE.BackSide }),
+
+        new THREE.MeshPhongMaterial({ 
+            color: 0x8b8b8b, map: textures[1],
+            side: THREE.BackSide }),
+           
+        new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, map: textures[14],
+            side: THREE.BackSide }),
+        
+        new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, map: textures[15],
+            side: THREE.BackSide }),
+        
+        new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, map: textures[16],
+            side: THREE.BackSide })];
+
+    // back alley
+    // roomGeom.faces[10].materialIndex = 0;
+    // roomGeom.faces[11].materialIndex = 0;
+
+    // ground
+    roomGeom.faces[6].materialIndex = 0;
+    roomGeom.faces[7].materialIndex = 0;
+
+    // left
+    roomGeom.faces[2].materialIndex = 1;
+    roomGeom.faces[3].materialIndex = 1;
+
+    // right
+    roomGeom.faces[0].materialIndex = 2;
+    roomGeom.faces[1].materialIndex = 2;
+
+    // top
+    roomGeom.faces[4].materialIndex = 3;
+    roomGeom.faces[5].materialIndex = 3;
+    textures[16].rotation.y = Math.PI;
+
+    var backgroundMesh = new THREE.Mesh(roomGeom, backgroundMaterials);
+    backgroundMesh.position.y = canvasParams.height/2;
+    scene.add(backgroundMesh);
+
+    // wrap textures for the ground
     textures[1].wrapS = THREE.MirroredRepeatWrapping;
     textures[1].wrapT = THREE.MirroredRepeatWrapping;
     textures[1].repeat.set(4,4);
-    textures[1].needsUpdate = true;
+    textures.needsUpdate = true;
 
-    textures[2].wrapS = THREE.MirroredRepeatWrapping;
-    textures[2].wrapT = THREE.RepeatWrapping;
-    textures[2].repeat.set(1,1);
-
-    textures[3].wrapS = THREE.MirroredRepeatWrapping;
-    textures[3].wrapT = THREE.RepeatWrapping;
-    textures[3].repeat.set(1,1);
-
-    textures[4].wrapS = THREE.MirroredRepeatWrapping;
-    textures[4].wrapT = THREE.RepeatWrapping;
-    textures[4].repeat.set(1,1);
-
-    textures[5].wrapS = THREE.MirroredRepeatWrapping;
-    textures[5].wrapT = THREE.RepeatWrapping;
-    textures[5].repeat.set(1,1);
-
-    textures[6].wrapS = THREE.MirroredRepeatWrapping;
-    textures[6].wrapT = THREE.RepeatWrapping;
-    textures[6].repeat.set(1,1);
-
-    textures[7].wrapS = THREE.MirroredRepeatWrapping;
-    textures[7].wrapT = THREE.RepeatWrapping;
-    textures[7].repeat.set(1,1);
-
-    textures[8].wrapS = THREE.MirroredRepeatWrapping;
-    textures[8].wrapT = THREE.RepeatWrapping;
-    textures[8].repeat.set(1,1);
-
-    textures[9].wrapS = THREE.MirroredRepeatWrapping;
-    textures[9].wrapT = THREE.RepeatWrapping;
-    textures[9].repeat.set(1,1);
-
-    textures[10].wrapS = THREE.MirroredRepeatWrapping;
-    textures[10].wrapT = THREE.RepeatWrapping;
-    textures[10].repeat.set(1,1);
-
-    textures[11].wrapS = THREE.MirroredRepeatWrapping;
-    textures[11].wrapT = THREE.RepeatWrapping;
-    textures[11].repeat.set(1,1);
-
-    textures[12].wrapS = THREE.MirroredRepeatWrapping;
-    textures[12].wrapT = THREE.RepeatWrapping;
-    textures[12].repeat.set(1,1);
-
-    // plane of alley in background
-    var planeGeom = new THREE.PlaneGeometry(600,400);
+    /* Create a separate plane geometry to draw an alley in the background.
+     * We did this instead of texture mapping the back side of roomGeom
+     * because we wanted to add neon signs to the photo to represent other 
+     * stands at the nightmarket. */
+    // var bgObject = new THREE.Object3D();
+    var planeGeom = new THREE.PlaneGeometry(canvasParams.width,canvasParams.roomHeight);
     var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[0]} );
     var planeMesh = new THREE.Mesh(planeGeom, planeMat);
+
     // adding the neon lights to the background
     // create meshes for the neon lights
     var neon1Geom = new THREE.PlaneGeometry(50,50);
@@ -912,15 +931,16 @@ function displayBackground(textures){
     neon6Mesh.position.set(-150,-10,1);
 
     planeMesh.add(neon1Mesh,neon2Mesh,neon3Mesh,neon4Mesh,neon5Mesh,neon6Mesh);
-    planeMesh.position.set(0,150,-80);
+    planeMesh.position.set(0,canvasParams.height/2,-250);
 
-    var groundGeom = new THREE.PlaneGeometry(1000,400);
-    var groundMat = new THREE.MeshBasicMaterial({color: 0xffffff,
-                                                 map: textures[1]});
-    var groundMesh = new THREE.Mesh(groundGeom,groundMat);
-    groundMesh.rotation.x = -Math.PI/2;
-    groundMesh.position.y = -50;
-    scene.add(planeMesh,groundMesh);
+    // var groundGeom = new THREE.PlaneGeometry(1000,400);
+    // var groundMat = new THREE.MeshBasicMaterial({color: 0xffffff,
+    //                                              map: textures[1]});
+    // var groundMesh = new THREE.Mesh(groundGeom,groundMat);
+    // groundMesh.rotation.x = -Math.PI/2;
+    // groundMesh.position.y = -50;
+
+    scene.add(planeMesh);
 }
 //===============================================
 //ANIMATION FOR THE FIGURES ON THE LEFT AND RIGHT
@@ -1111,7 +1131,8 @@ function createSoundBox(textures) {
     soundbox.add(soundboxMesh);
 
     // create a transparent box around the sound icon
-    var soundboxTransparentGeom = new THREE.BoxGeometry(25,25,25);
+    var soundboxTransparentGeom = new THREE.BoxGeometry(
+            params.soundboxLength,params.soundboxLength,params.soundboxLength);
     addTextureCoords(soundboxTransparentGeom, textures);
     // right
     soundboxTransparentGeom.faces[0].materialIndex = 1;
@@ -1144,7 +1165,9 @@ function createSoundBox(textures) {
     soundboxTransparent.name = "soundbox";
     soundbox.add(soundboxTransparent);
 
-    soundbox.position.set(200,150,10);
+    soundbox.position.set(
+        canvasParams.width/2 - params.soundboxLength - canvasParams.width/8, 
+        canvasParams.roomHeight/2 - params.soundboxLength - canvasParams.height/15, -50);
     scene.add(soundbox);
 }
 
@@ -1230,7 +1253,8 @@ TW.loadTextures(["images/alley1.jpg", "images/bricks.jpg",
                  "images/neon4.jpg", "images/neon5.jpeg", "images/neon6.jpg",
                  "images/neon7.jpeg", "images/neon8.jpg", "images/neon9.jpg",
                  "images/neon10.jpg", "images/neon11.jpg", "images/sound.png",
-                 "images/market-left.png"], 
+                 "images/nm-left.png", "images/nm-right.jpeg", 
+                 "images/nm-top.jpg"], 
                 function (textures) {
                     textureGlobal = textures;
                     displayBackground(textures);
