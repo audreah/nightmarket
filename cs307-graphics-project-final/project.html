@@ -37,23 +37,39 @@ Creates an image of a nightmarket food stand.
 <div style="word-wrap:break-word; max-width:80%; 
     text-align: center;margin-left: auto; margin-right:auto;">
     <p style="color:white; margin: 0 auto 0 0;text-align: center;">
-        <b>Name</b>: Nanxi Liu and Audrea Huang<br>
+        Nanxi Liu and Audrea Huang<br>
         <b>CS 307 Final Project</b><br>
-        <b>Date</b>: May 16, 2022<br>
-        <b>Description</b>: Welcome to our night market candy stand!<br><br>
+        May 16, 2022<br>
+        Welcome to our night market candy stand!<br><br>
             To toggle the music on and off, click the sound
             icon at the top right corner within the semi-transparent box.<br><br>
+
             Press "g" to make the figure on the right spin and 
             press "s" to make it stop.<br> 
             Press "2" to make it spin step by step and 
             press "0" to set it back to its original state.<br><br>
+
             Press "j" to make the figure on the left bounce and 
-            press space to make it stop.<br>
-            Press "1" to set it back to its original state.<br>
+            press the space bar to make it stop.<br>
+            Press "1" to set it back to its original state.<br><br>
+
+            Customers can also walk through the scene!<br>
+            Press "w" to start the animation and "a" to stop.<br>
+            Press "d" to restart the animation.<br>
     <br></p>
 </div>
 
 <script id="prog">
+
+/* storing the dimensions of the canvas allows us to create
+ * the camera params and dimensions of the room for the
+ * nightmarket scene in relation */
+ var canvasParams = {
+    width: 800.0,
+    height: 500.0,
+    roomHeight: 600
+}
+
 //the two dance arrays determine peppa's dance moves
 var danceX = [2,1,-3,0,5,10,-5,6,6,0,1,-23];
 var danceY = [1,2,3,4,0,5,-1,-2,-3,0,-4,-5];
@@ -132,8 +148,8 @@ var params = {
     peppa1Rotation: Math.PI/4,
     // parameters for peppa on the right
     peppa2X: 150,
-    peppa2Y: -10,
-    peppa2Z: 70,
+    peppa2Y: 0,
+    peppa2Z: 60,
     peppa2Color: 0xed9f2b,
     peppa2Rotation: -Math.PI/4,
     // parameters for peppa in the middle
@@ -147,22 +163,18 @@ var params = {
     ry: 0.05,
     timeRight: 0,
     timeLeft: 0,
+    timeCustomer: 0,
     // parameters for the bouncing peppa
     peppaBouncePeriod: 3,  // time to bounce once, in arbitrary time units
     maxPeppaHeight: 40,     // max y position of the center of the ball
     deltaT: 0.035,
     peppaBodyHeight: 50,
+    // starting parameters for the customer
+    peppa3X: canvasParams.width/2.5, // start off-screen
+    peppa3Y: -canvasParams.height/30,
+    peppa3Z: 80,
     // soundbox
     soundboxLength: 25,
-}
-
-/* storing the dimensions of the canvas allows us to create
- * the camera params and dimensions of the room for the
- * nightmarket scene in relation */
-var canvasParams = {
-    width: 800.0,
-    height: 500.0,
-    roomHeight: 600
 }
 
 // peppa is the global variable name for the object that's been clicked on.
@@ -182,11 +194,11 @@ TW.mainInit(renderer,scene);
 // CAMERA
 // ================
 
-TW.cameraSetup(renderer,
-               scene,
-               {minx: -400, maxx: 400,
-                miny: -100, maxy: 300,
-                minz: -200, maxz: 300});
+// TW.cameraSetup(renderer,
+//                scene,
+//                {minx: -400, maxx: 400,
+//                 miny: -100, maxy: 300,
+//                 minz: -200, maxz: 300});
 
 var cameraParams = {
     near: 5,
@@ -203,10 +215,10 @@ var cameraParams = {
     upY: 1,
     upZ: 0
 };
-// SET UP THE CAMERA
+
 function setupCamera (cameraParameters) {
-    // set up an abbreviation 
-    var cp = cameraParameters;
+    // set up the camera
+    var cp = cameraParameters; // create an abbreviation
     // create an initial camera with the desired shape
     var camera = new THREE.PerspectiveCamera(cp.fov,
                                              cp.aspectRatio,
@@ -758,7 +770,7 @@ function addLeg(body,side,params,bodyMaterial,shoeMaterial) {
     body.add(leg);
 }
 
-function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
+function makePeppa(params, size, bodyColor, dressColor, shoeColor) {
     /* construct a peppa pig
      * @param params - collection of dimensions
      * @param size - scale of peppa
@@ -768,10 +780,10 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
      * @return {THREE.Object3D} peppa object */
     var bodyMaterial = new THREE.MeshPhongMaterial({color: bodyColor,
                                                     specular: bodyColor,
-                                                    shininess: 1});
+                                                    shininess: 0.5});
     var dressMaterial = new THREE.MeshPhongMaterial({color: dressColor,
                                                     specular: THREE.ColorKeywords.white,
-                                                    shininess:1});
+                                                    shininess:0.75});
     var shoeMaterial = new THREE.MeshPhongMaterial({color: shoeColor,
                                                     specular: THREE.ColorKeywords.white,
                                                     shininess:20});
@@ -795,14 +807,13 @@ function makePeppa(params,size,bodyColor,dressColor,shoeColor) {
     addEar(head,params,-1,bodyMaterial);
     // create the entire body
     var body;
-    //this step determines which dress global variable peppe's dress will be assigned to
+    // this step determines which dress global variable peppe's dress will be assigned to
     if (dressColor == 0xf5574c){
-        dress1 = createBody(params,dressMaterial);
+        dress1 = createBody(params, dressMaterial);
         body = dress1;
-        console.log("dress1 color detected");
     }
     else{
-        body = createBody(params,dressMaterial);
+        body = createBody(params, dressMaterial);
     }
     addArm(body,1,params,bodyMaterial);
     addArm(body,-1,params,bodyMaterial);
@@ -858,10 +869,6 @@ function displayBackground(textures){
             color: 0xffffff, map: textures[16],
             side: THREE.BackSide })];
 
-    // back alley
-    // roomGeom.faces[10].materialIndex = 0;
-    // roomGeom.faces[11].materialIndex = 0;
-
     // ground
     roomGeom.faces[6].materialIndex = 0;
     roomGeom.faces[7].materialIndex = 0;
@@ -893,7 +900,7 @@ function displayBackground(textures){
      * We did this instead of texture mapping the back side of roomGeom
      * because we wanted to add neon signs to the photo to represent other 
      * stands at the nightmarket. */
-    // var bgObject = new THREE.Object3D();
+
     var planeGeom = new THREE.PlaneGeometry(canvasParams.width,canvasParams.roomHeight);
     var planeMat = new THREE.MeshBasicMaterial( {color:0xffffff,map:textures[0]} );
     var planeMesh = new THREE.Mesh(planeGeom, planeMat);
@@ -943,14 +950,14 @@ function displayBackground(textures){
     scene.add(planeMesh);
 }
 //===============================================
-//ANIMATION FOR THE FIGURES ON THE LEFT AND RIGHT
+// ANIMATION FOR THE FIGURES ON THE LEFT AND RIGHT
 //===============================================
 var peppaPig2;
-//this sets peppa2 back to its original rotation and position
-function firstState2(){
+
+function firstState2() {
+    // sets peppa2 back to its original rotation and position
     if ( peppaPig2 != null ) {
         scene.remove(peppaPig2);
-        console.log("peppa2 removed");
         render();
     }
     params.timeRight = 0;
@@ -960,17 +967,19 @@ function firstState2(){
     scene.add(peppaPig2);
     render();
 }
+
 firstState2();
-//animation for peppa on the right
+
 function updateState2() {
+    // animation for peppa on the right
     params.timeRight += 1;
     // increase the total rotations by the velocity
     //params.peppa2Rotation += params.ry;
     peppaPig2.rotateY(params.ry);
 }
 
-// oneStep() performs one step of the animation
 function oneStep2() {
+    // performs one step of the animation
     updateState2();
     render();
 }
@@ -978,14 +987,14 @@ function oneStep2() {
 // stored so that we can cancel the animation if we want
 var animationId2 = null;                
 
-// animate() starts the continuous animation loop
 function animate2(timestamp) {
+    // starts the continuous animation loop
     oneStep2();
     animationId2 = requestAnimationFrame(animate2);
 }
 
-// stopAnimation() halts the animation
 function stopAnimation2() {
+    // halts the animation
     if( animationId2 != null ) {
         cancelAnimationFrame(animationId2);
         console.log("Cancelled animation using " + animationId2);
@@ -998,24 +1007,25 @@ TW.setKeyboardCallback("2", oneStep2, "advance by one step");
 TW.setKeyboardCallback("g", animate2, "go:  start animation");
 TW.setKeyboardCallback("s", stopAnimation2, "stop animation");
 
-function firstState(){
+//animation for the peppa on the left
+function firstState() {
     params.timeLeft = 0;
     peppaPig1.position.y = 30;
     render();
 }
 
-//animation for the peppa on the left
 function linearMap (x, minx, maxx, miny, maxy) {
+    /* Gets Peppa's height 
+     * @return current y coordinate */
     // t is in the range [0,1]
     t = (x-minx)/(maxx-minx);
     y = t*(maxy-miny)+miny;
     return y;
 };
 
-// sets the position of the ball based on current time
-
 function setPeppaPosition (time) {
-    // rescale the time dimension so that the period of bouncing maps to pi
+    // sets the position of peppa based on current time, using the linear map
+    // rescale the time dimension so that the period of bouncing maps to PI
     var angle = time * Math.PI / params.peppaBouncePeriod; 
     var abs_cos = Math.abs(Math.cos(angle));
     var peppaHeight = linearMap(abs_cos, 0, 1, 
@@ -1024,14 +1034,14 @@ function setPeppaPosition (time) {
     return peppaHeight;
 }
 
-//animation for peppa on the left
 function updateState1() {
+    // animation for peppa on the left
     params.timeLeft += params.deltaT;
     params.peppa1Y = setPeppaPosition(params.timeLeft);
 }
 
-// oneStep() performs one step of the animation
 function oneStep1() {
+    // performs one step of the animation
     updateState1();
     render();
 }
@@ -1039,14 +1049,14 @@ function oneStep1() {
 // stored so that we can cancel the animation if we want
 var animationId1 = null;                
 
-// animate() starts the continuous animation loop
 function animate1(timestamp) {
+    // starts the continuous animation loop
     oneStep1();
     animationId1 = requestAnimationFrame(animate1);
 }
 
-// stopAnimation() halts the animation
 function stopAnimation1() {
+    // halts the animation
     if( animationId1 != null ) {
         cancelAnimationFrame(animationId1);
         console.log("Cancelled animation using " + animationId1);
@@ -1054,10 +1064,76 @@ function stopAnimation1() {
 }
 
 // keyboard controls for the animation control
-
 TW.setKeyboardCallback("1", firstState, "reset animation");
 TW.setKeyboardCallback("j", animate1, "go:  start animation");
 TW.setKeyboardCallback(" ", stopAnimation1, "stop animation");
+
+// animation for peppas walking across the screen
+var peppaCustomer;
+var velocity = -1;
+var dressColors = [0x4297A0, 0xE57F84, 0x2F5061, 0x613659];
+
+function firstWalkingState() {
+    /* Resets the animation for customers walking in the nightmarket,
+     * where the figures start off the screen to the right. */
+    if (peppaCustomer != null) {
+        scene.remove(peppaCustomer);
+    }
+    var randColor = dressColors[Math.floor(Math.random() * dressColors.length)];
+    peppaCustomer = makePeppa(params, 1, 0xf2a5c9, randColor, "black");
+    scene.add(peppaCustomer);
+    peppaCustomer.position.set(params.peppa3X, params.peppa3Y, params.peppa3Z);
+    render();
+}
+
+firstWalkingState();
+
+function linearMapX (x, minx, maxx, miny, maxy) {
+    /* Gets Peppa's height 
+     * @return current y coordinate */
+    // t is in the range [0,1]
+    t = (y-miny)/(maxy-miny);
+    x = t*(maxx-minx)+minx;
+    return x;
+};
+
+function updateWalkingState() {
+    /* Shifts the positions of the customers. */
+    peppaCustomer.position.x += velocity;
+    params.timeCustomer += params.deltaT;
+}
+
+function oneWalkingStep() {
+    /* Completes one step of the animation. */
+    updateWalkingState();
+    render();
+}
+
+var animationId3 = null;
+function animateWalking(timestamp) {
+    /* Runs the entire animation of all the Peppas walking
+     * across the screen at different intervals. */
+    oneWalkingStep();
+    if (peppaCustomer.position.x < -canvasParams.width/2) {
+        firstWalkingState();
+    }
+    animationId3 = requestAnimationFrame(animateWalking);
+    
+}
+
+function stopWalkingAnimation() {
+    /* Halts the animation of customers walking across the screen. */
+    if (animationId3 != null) {
+        cancelAnimationFrame(animationId3);
+    }
+}
+
+// keyboard controls for the animation control
+TW.setKeyboardCallback("d", firstWalkingState, "reset animation");
+TW.setKeyboardCallback("e", oneWalkingStep, "advance by one step");
+TW.setKeyboardCallback("w", animateWalking, "go:  start animation");
+TW.setKeyboardCallback("a", stopWalkingAnimation, "stop animation");
+
 
 var nframes = 0;
 //runTimer makes peppa dance for 12 frames
@@ -1065,7 +1141,7 @@ function runTimer () {
     if (peppa != null) {
         scene.remove(peppa);
     }
-    //change peppa's leg and arm parameters in params
+    // change peppa's leg and arm parameters in params
     params.peppaPosX += danceX[nframes];
     params.peppaPosY += danceY[nframes];
     peppa = makePeppa(params,1,0xf2a5c9,params.peppaDressColor,"black");
@@ -1073,24 +1149,18 @@ function runTimer () {
     peppa.rotation.y = params.peppaRotation;
     scene.add(peppa);
     nframes += 1;
-    console.log("nframes:",nframes);
     if (nframes > 12) {
-        clearInterval(clock);        // stop the timer started with setInterval()
+        clearInterval(clock); // stop the timer started with setInterval()
         nframes = 0;
-        //this step restores the peppa that has been removed from the scene
-        if(params.peppaDressColor == params.peppa0Color){
+        // this step restores the peppa that has been removed from the scene
+        if (params.peppaDressColor == params.peppa0Color) {
             peppaPig = makePeppa(params,1,0xf2a5c9,0xf5574c,"black");
             peppaPig.position.set(params.peppa0X, params.peppa0Y, params.peppa0Z);
             marketStand.add(peppaPig);
-            console.log("peppa0 RESTORED");
         }
-        render();
-    } else {
         render();
     }
 }
-
-
 
 // ===================
 // sound
