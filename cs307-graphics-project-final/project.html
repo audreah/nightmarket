@@ -70,9 +70,7 @@ Creates an image of a nightmarket food stand.
     roomHeight: 600
 }
 
-//the two dance arrays determine peppa's dance moves
-var danceX = [2,1,-3,0,5,10,-5,6,6,0,1,-23];
-var danceY = [1,2,3,4,0,5,-1,-2,-3,0,-4,-5];
+//params contains all the parameters needed for implementation of the functions
 var params = {
     poleRadius: 2,
     poleHeight: 50,
@@ -806,15 +804,7 @@ function makePeppa(params, size, bodyColor, dressColor, shoeColor) {
     addEar(head,params,1,bodyMaterial);
     addEar(head,params,-1,bodyMaterial);
     // create the entire body
-    var body;
-    // this step determines which dress global variable peppe's dress will be assigned to
-    if (dressColor == 0xf5574c){
-        dress1 = createBody(params, dressMaterial);
-        body = dress1;
-    }
-    else{
-        body = createBody(params, dressMaterial);
-    }
+    var body = createBody(params, dressMaterial);
     addArm(body,1,params,bodyMaterial);
     addArm(body,-1,params,bodyMaterial);
     addLeg(body,1,params,bodyMaterial,shoeMaterial);
@@ -1134,34 +1124,6 @@ TW.setKeyboardCallback("e", oneWalkingStep, "advance by one step");
 TW.setKeyboardCallback("w", animateWalking, "go:  start animation");
 TW.setKeyboardCallback("a", stopWalkingAnimation, "stop animation");
 
-
-var nframes = 0;
-//runTimer makes peppa dance for 12 frames
-function runTimer () {
-    if (peppa != null) {
-        scene.remove(peppa);
-    }
-    // change peppa's leg and arm parameters in params
-    params.peppaPosX += danceX[nframes];
-    params.peppaPosY += danceY[nframes];
-    peppa = makePeppa(params,1,0xf2a5c9,params.peppaDressColor,"black");
-    peppa.position.set(params.peppaPosX, params.peppaPosY, params.peppaPosZ);
-    peppa.rotation.y = params.peppaRotation;
-    scene.add(peppa);
-    nframes += 1;
-    if (nframes > 12) {
-        clearInterval(clock); // stop the timer started with setInterval()
-        nframes = 0;
-        // this step restores the peppa that has been removed from the scene
-        if (params.peppaDressColor == params.peppa0Color) {
-            peppaPig = makePeppa(params,1,0xf2a5c9,0xf5574c,"black");
-            peppaPig.position.set(params.peppa0X, params.peppa0Y, params.peppa0Z);
-            marketStand.add(peppaPig);
-        }
-        render();
-    }
-}
-
 // ===================
 // sound
 // ===================
@@ -1285,19 +1247,7 @@ function onClick (event) {
     var intersects = raycaster.intersectObjects(scene.children, true);
     
     if (intersects.length > 0) {
-        clickedObject = intersects[0].object;
-        //this step determines which peppa has been clicked on
-        if (clickedObject == dress1) {
-            clickedObject = peppaPig;
-            params.peppaPosX = params.peppa0X;
-            params.peppaPosY = -10;
-            params.peppaPosZ = params.peppa0Z;
-            params.peppaDressColor = params.peppa0Color;
-            params.peppaRotation = params.peppa0Rotation;
-            console.log("clicked on peppaPigMiddle");
-            marketStand.remove(peppaPig);
-            clock = setInterval(runTimer,500);
-        } 
+        clickedObject = intersects[0].object; 
         if (clickedObject.name == "soundbox") {
             if (!sound.isPlaying) { 
                 audioLoader.load( 'music.m4a', function( buffer ) {
@@ -1323,7 +1273,7 @@ TW.loadTextures(["images/alley1.jpg", "images/bricks.jpg",
                  "images/neon4.jpg", "images/neon5.jpeg", "images/neon6.jpg",
                  "images/neon7.jpeg", "images/neon8.jpg", "images/neon9.jpg",
                  "images/neon10.jpg", "images/neon11.jpg", "images/sound.png",
-                 "images/nm-left.png", "images/nm-right.jpeg", 
+                 "images/NM12.jpeg", "images/NM12.jpeg", 
                  "images/nm-top.jpg"], 
                 function (textures) {
                     textureGlobal = textures;
