@@ -112,7 +112,7 @@ var params = {
     eyeAngleXL: -Math.PI/4,
     eyeAngleYL: -Math.PI/10,
     eyeAngleXR: -Math.PI/6,
-    eyeAngleYR: Math.PI/20,//Math.PI/10,
+    eyeAngleYR: Math.PI/20,
     eyeRotation: Math.PI*0.7,
     earRadius: 2,
     earScaleY: 2,
@@ -191,12 +191,6 @@ TW.mainInit(renderer,scene);
 // ================
 // CAMERA
 // ================
-
-// TW.cameraSetup(renderer,
-//                scene,
-//                {minx: -400, maxx: 400,
-//                 miny: -100, maxy: 300,
-//                 minz: -200, maxz: 300});
 
 var cameraParams = {
     near: 5,
@@ -302,7 +296,7 @@ function addTextureCoords (geom, textures) {
 
 function createSignLight() {
     /* Creates a single lightbulb to be placed on the perimeter of the sign
-        * @return object for the lightbulb, which includes the bulb and the light */
+     * @return lightbulb object, which includes the bulb and the light */
     var lightbulbObj = new THREE.Object3D();
 
     var lightbulbGeom = new THREE.SphereGeometry(params.signLightRadius);
@@ -366,7 +360,6 @@ function createSign() {
      * for the backing, text for the name in Chinese of the contents being
      * sold, and lights along the perimeter.
      * @param textures - list of textures */
-    // var signObj = new THREE.Object3D();
 
     var signGeom = new THREE.BoxGeometry(
         params.tableWidth, params.signHeight, params.signDepth);
@@ -839,24 +832,16 @@ function displayBackground(textures){
     
 
     var backgroundMaterials = [
-        // new THREE.MeshPhongMaterial({ 
-        //     color: 0xffffff, map: textures[0],
-        //     side: THREE.BackSide }),
-
         new THREE.MeshPhongMaterial({ 
             color: 0x8b8b8b, map: textures[1],
             side: THREE.BackSide }),
            
         new THREE.MeshPhongMaterial({ 
-            color: 0xffffff, map: textures[14],
+            color: 0xffffff, map: textures[9],
             side: THREE.BackSide }),
         
         new THREE.MeshPhongMaterial({ 
-            color: 0xffffff, map: textures[15],
-            side: THREE.BackSide }),
-        
-        new THREE.MeshPhongMaterial({ 
-            color: 0xffffff, map: textures[16],
+            color: 0xffffff, map: textures[9],
             side: THREE.BackSide })];
 
     // ground
@@ -870,11 +855,6 @@ function displayBackground(textures){
     // right
     roomGeom.faces[0].materialIndex = 2;
     roomGeom.faces[1].materialIndex = 2;
-
-    // top
-    roomGeom.faces[4].materialIndex = 3;
-    roomGeom.faces[5].materialIndex = 3;
-    textures[16].rotation.y = Math.PI;
 
     var backgroundMesh = new THREE.Mesh(roomGeom, backgroundMaterials);
     backgroundMesh.position.y = canvasParams.height/2;
@@ -928,21 +908,15 @@ function displayBackground(textures){
     neon6Mesh.position.set(-150,-10,1);
 
     planeMesh.add(neon1Mesh,neon2Mesh,neon3Mesh,neon4Mesh,neon5Mesh,neon6Mesh);
-    planeMesh.position.set(0,canvasParams.height/2,-250);
-
-    // var groundGeom = new THREE.PlaneGeometry(1000,400);
-    // var groundMat = new THREE.MeshBasicMaterial({color: 0xffffff,
-    //                                              map: textures[1]});
-    // var groundMesh = new THREE.Mesh(groundGeom,groundMat);
-    // groundMesh.rotation.x = -Math.PI/2;
-    // groundMesh.position.y = -50;
+    planeMesh.position.set(0,canvasParams.height/2-50,-250);
 
     scene.add(planeMesh);
 }
-//===============================================
-// ANIMATION FOR THE FIGURES ON THE LEFT AND RIGHT
-//===============================================
-var peppaPig2;
+//=========================
+// Animation for the pigs, excluding the one behind the stand
+//=========================
+
+var peppaPig2; // represents the figure on the right
 
 function firstState2() {
     // sets peppa2 back to its original rotation and position
@@ -987,7 +961,6 @@ function stopAnimation2() {
     // halts the animation
     if( animationId2 != null ) {
         cancelAnimationFrame(animationId2);
-        console.log("Cancelled animation using " + animationId2);
     }
 }
 
@@ -997,7 +970,8 @@ TW.setKeyboardCallback("2", oneStep2, "advance by one step");
 TW.setKeyboardCallback("g", animate2, "go:  start animation");
 TW.setKeyboardCallback("s", stopAnimation2, "stop animation");
 
-//animation for the peppa on the left
+
+// animation for the peppa on the left
 function firstState() {
     params.timeLeft = 0;
     peppaPig1.position.y = 30;
@@ -1049,7 +1023,6 @@ function stopAnimation1() {
     // halts the animation
     if( animationId1 != null ) {
         cancelAnimationFrame(animationId1);
-        console.log("Cancelled animation using " + animationId1);
     }
 }
 
@@ -1058,21 +1031,33 @@ TW.setKeyboardCallback("1", firstState, "reset animation");
 TW.setKeyboardCallback("j", animate1, "go:  start animation");
 TW.setKeyboardCallback(" ", stopAnimation1, "stop animation");
 
-// animation for peppas walking across the screen
+
+// animation for the customers walking across the screen
+// create an array to hold the customer objects so we can more easily
+// access them and perform repeated actions
 var peppaCustomer;
-var velocity = -1;
+var peppaCustomer1, peppaCustomer2, peppaCustomer3;
+var customers = [peppaCustomer1, peppaCustomer2, peppaCustomer3];
+
+// the customers will travel from right to left, each at a differend speed
+var velocities = [-0.75, -1, -1.5]; 
+
+// create a list of possible dress colors
 var dressColors = [0x4297A0, 0xE57F84, 0x2F5061, 0x613659];
 
 function firstWalkingState() {
     /* Resets the animation for customers walking in the nightmarket,
      * where the figures start off the screen to the right. */
-    if (peppaCustomer != null) {
-        scene.remove(peppaCustomer);
+    for (var i=0; i<customers.length; i++) {
+        if (customers[i] != null) {
+            scene.remove(customers[i]);
+        }
+    
+        var randColor = dressColors[Math.floor(Math.random() * dressColors.length)];
+        customers[i] = makePeppa(params, 1, 0xf2a5c9, randColor, "black");
+        scene.add(customers[i]);
+        customers[i].position.set(params.peppa3X, params.peppa3Y, params.peppa3Z);
     }
-    var randColor = dressColors[Math.floor(Math.random() * dressColors.length)];
-    peppaCustomer = makePeppa(params, 1, 0xf2a5c9, randColor, "black");
-    scene.add(peppaCustomer);
-    peppaCustomer.position.set(params.peppa3X, params.peppa3Y, params.peppa3Z);
     render();
 }
 
@@ -1089,8 +1074,10 @@ function linearMapX (x, minx, maxx, miny, maxy) {
 
 function updateWalkingState() {
     /* Shifts the positions of the customers. */
-    peppaCustomer.position.x += velocity;
-    params.timeCustomer += params.deltaT;
+    for (var i=0; i<customers.length; i++) {
+        customers[i].position.x += velocities[i];
+        params.timeCustomer += params.deltaT;
+    }
 }
 
 function oneWalkingStep() {
@@ -1104,11 +1091,22 @@ function animateWalking(timestamp) {
     /* Runs the entire animation of all the Peppas walking
      * across the screen at different intervals. */
     oneWalkingStep();
-    if (peppaCustomer.position.x < -canvasParams.width/2) {
-        firstWalkingState();
+    for (var i=0; i<customers.length; i++) {
+        if (customers[i].position.x < -canvasParams.width/2) {
+            // if one customer is off screen, just restart that one 
+            // instead of all of them at once
+            var randColor = dressColors[
+                Math.floor(Math.random() * dressColors.length)
+            ];
+            customers[i] = makePeppa(params, 1, 0xf2a5c9, randColor, "black");
+            scene.add(customers[i]);
+            customers[i].position.set(
+                params.peppa3X, params.peppa3Y, params.peppa3Z
+            );
+        } 
     }
-    animationId3 = requestAnimationFrame(animateWalking);
     
+    animationId3 = requestAnimationFrame(animateWalking);
 }
 
 function stopWalkingAnimation() {
@@ -1141,7 +1139,7 @@ function createSoundBox(textures) {
 
     var materials = [
         new THREE.MeshPhongMaterial({ 
-            color: 0xffffff, map: textures[13] }), // sound icon
+            color: 0xffffff, map: textures[8] }), // sound icon
         new THREE.MeshPhongMaterial({ 
             color: 0xFFDDFA, transparent: true, opacity: 0.5 }), // pink
         new THREE.MeshPhongMaterial({ 
@@ -1253,7 +1251,7 @@ function onClick (event) {
                 audioLoader.load( 'music.m4a', function( buffer ) {
                     sound.setBuffer( buffer );
                     sound.setLoop(true);
-                    sound.setVolume(0.5);
+                    sound.setVolume(0.75);
                     sound.play();
                 });
             } else {
@@ -1270,11 +1268,8 @@ function onClick (event) {
 // ===================
 TW.loadTextures(["images/alley1.jpg", "images/bricks.jpg",
                  "images/neon1.jpg", "images/neon2.jpg", "images/neon3.jpg", 
-                 "images/neon4.jpg", "images/neon5.jpeg", "images/neon6.jpg",
-                 "images/neon7.jpeg", "images/neon8.jpg", "images/neon9.jpg",
-                 "images/neon10.jpg", "images/neon11.jpg", "images/sound.png",
-                 "images/NM12.jpeg", "images/NM12.jpeg", 
-                 "images/nm-top.jpg"], 
+                 "images/neon4.jpg", "images/neon5.jpg", "images/neon6.jpg",
+                 "images/sound.png", "images/NM12.jpg"], 
                 function (textures) {
                     textureGlobal = textures;
                     displayBackground(textures);
